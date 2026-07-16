@@ -39,6 +39,9 @@ export default function RootLayout() {
             <Stack.Screen name="generating" options={{ animation: 'fade' }} />
             <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
             <Stack.Screen name="workout" />
+            <Stack.Screen name="activity" />
+            <Stack.Screen name="feedback" options={{ presentation: 'transparentModal', animation: 'fade' }} />
+            <Stack.Screen name="checkin" options={{ presentation: 'modal' }} />
           </Stack>
         </ThemeProvider>
       </StoreProvider>

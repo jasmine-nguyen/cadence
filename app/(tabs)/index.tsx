@@ -68,7 +68,12 @@ export default function Today() {
     case 'planned':
       content = (
         <>
-          <TodayHeader variant="planned" week={plan.week} weekLabel={`Week ${plan.currentWeek}/${plan.totalWeeks}`} />
+          <TodayHeader
+            variant="planned"
+            week={plan.week}
+            weekLabel={`Week ${plan.currentWeek}/${plan.totalWeeks}`}
+            onBell={() => router.push('/checkin')}
+          />
           <ScreenScroll contentContainerStyle={[styles.body, bodyPad]}>
             <SectionHeader temp={seedWorkout.weather.temp} />
             <PlannedWorkoutCard workout={seedWorkout} onOpen={openWorkout} />
@@ -91,7 +96,7 @@ export default function Today() {
     case 'paused':
       content = (
         <>
-          <TodayHeader variant="paused" week={plan.week} weekLabel="Paused" />
+          <TodayHeader variant="paused" week={plan.week} weekLabel="Paused" onBell={() => router.push('/checkin')} />
           <ScreenScroll contentContainerStyle={[styles.body, bodyPad]}>
             <PausedBanner pausedAt={plan.pausedAt} onResume={resumePlan} />
             <WhereYouLeftOff week={plan.currentWeek} totalWeeks={plan.totalWeeks} progress={plan.progress} />
@@ -111,7 +116,7 @@ export default function Today() {
               <Text variant="h2">Today's workout</Text>
             </View>
             <CompletedWorkoutCard workout={seedWorkout} />
-            <NiceWorkCard />
+            <NiceWorkCard onFeedback={() => router.push('/feedback')} />
             <WeekOverviewCard week={plan.currentWeek} progress={completedProgress} showChevron={false} />
           </ScreenScroll>
         </>

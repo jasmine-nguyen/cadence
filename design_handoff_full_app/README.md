@@ -26,18 +26,18 @@ Claude Code: tick a box (`[x]`) when a screen is implemented and matches its scr
 
 | # | Screen | States | Status | Notes |
 |---|---|---|---|---|
-| — | **Foundation** (theme tokens, Button, Card, Chip, SegmentedControl, TextField, Toggle, Slider, BottomSheet, TabBar) | — | [ ] | build first if repo is empty |
-| — | **Navigation** (onboarding stack → auth → tab navigator; modals) | — | [ ] | |
-| 1 | Onboarding & Goal Setup | step 1 · step 2 · step 3 · generating | [ ] | |
-| 2 | Login / Sign-up | login · 2FA · error | [ ] | |
-| 3 | Today | planned · paused · completed · empty · error | [ ] | |
-| 4 | Workout Detail | default · skip sheet · in-progress | [ ] | |
-| 5 | Plan / Calendar | week view · multi-week · reschedule · paused | [ ] | |
-| 6 | Insights Dashboard | dashboard · building | [ ] | |
-| 7 | Activity History | list · detail · empty | [ ] | |
-| 8 | Post-Workout Feedback | prompt · saved | [ ] | |
-| 9 | Missed-session check-in | prompt · adjusted | [ ] | |
-| 10 | Settings | main · pause sheet | [ ] | |
+| — | **Foundation** (theme tokens, Button, Card, Chip, SegmentedControl, TextField, Toggle, Slider, BottomSheet, TabBar) | — | [x] | `src/theme` + `src/components` |
+| — | **Navigation** (onboarding stack → auth → tab navigator; modals) | — | [x] | Expo Router in `app/` |
+| 1 | Onboarding & Goal Setup | step 1 · step 2 · step 3 · generating | [x] | PR #2 |
+| 2 | Login / Sign-up | login · 2FA · error | [x] | PR #2 |
+| 3 | Today | planned · paused · completed · empty · error | [x] | PR #2 |
+| 4 | Workout Detail | default · skip sheet · in-progress | [x] | PR #2 |
+| 5 | Plan / Calendar | week view · multi-week · reschedule · paused | [x] | PR #2 · long-press drag |
+| 6 | Insights Dashboard | dashboard · building | [x] | PR #2 |
+| 7 | Activity History | list · detail · empty | [x] | PR #2 |
+| 8 | Post-Workout Feedback | prompt · saved | [x] | PR #2 · from Today·Completed |
+| 9 | Missed-session check-in | prompt · adjusted | [x] | PR #2 · from Today bell |
+| 10 | Settings | main · pause sheet | [x] | PR #2 |
 
 ## About the Design Files
 `Cadence Screens.dc.html` is a **design reference authored in HTML** — a prototype showing intended look, layout, copy, and behavior. It is **not production code to copy directly.** HTML/CSS is only the rendering medium.
