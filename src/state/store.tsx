@@ -5,8 +5,11 @@ import {
   OnboardingState,
   PlanState,
   TodayState,
+  SettingsState,
+  InsightsData,
+  Activity,
 } from './types';
-import { seedPlan } from './data';
+import { seedPlan, seedSettings, seedInsights, seedActivities } from './data';
 
 const initialOnboarding: OnboardingState = {
   step: 1,
@@ -31,6 +34,9 @@ interface Store {
   plan: PlanState;
   /** Which of the five designed Today variants to render. */
   todayState: TodayState;
+  settings: SettingsState;
+  insights: InsightsData;
+  activities: Activity[];
 
   setOnboarding: React.Dispatch<React.SetStateAction<OnboardingState>>;
   toggleInjury: (injury: Injury) => void;
@@ -41,6 +47,9 @@ interface Store {
   pausePlan: () => void;
   resumePlan: () => void;
   retrySync: () => void;
+
+  setSettings: React.Dispatch<React.SetStateAction<SettingsState>>;
+  setInsightsReady: (ready: boolean) => void;
 }
 
 const StoreContext = createContext<Store | null>(null);
@@ -50,6 +59,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [auth, setAuth] = useState(initialAuth);
   const [plan, setPlan] = useState(seedPlan);
   const [todayState, setTodayState] = useState<TodayState>('planned');
+  const [settings, setSettings] = useState(seedSettings);
+  const [insights, setInsights] = useState(seedInsights);
+  const [activities] = useState(seedActivities);
+
+  const setInsightsReady = useCallback(
+    (ready: boolean) => setInsights((i) => ({ ...i, ready })),
+    [],
+  );
 
   const toggleInjury = useCallback((injury: Injury) => {
     setOnboarding((prev) => {
@@ -84,6 +101,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       auth,
       plan,
       todayState,
+      settings,
+      insights,
+      activities,
       setOnboarding,
       toggleInjury,
       setAuth,
@@ -91,8 +111,23 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       pausePlan,
       resumePlan,
       retrySync,
+      setSettings,
+      setInsightsReady,
     }),
-    [onboarding, auth, plan, todayState, toggleInjury, pausePlan, resumePlan, retrySync],
+    [
+      onboarding,
+      auth,
+      plan,
+      todayState,
+      settings,
+      insights,
+      activities,
+      toggleInjury,
+      pausePlan,
+      resumePlan,
+      retrySync,
+      setInsightsReady,
+    ],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

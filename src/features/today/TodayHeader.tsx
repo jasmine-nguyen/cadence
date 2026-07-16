@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, Pressable, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text, ProgressRing } from '@/components';
 import { User, Bell, ChevronDown, Pause } from '@/components/icons';
@@ -13,6 +13,8 @@ interface TodayHeaderProps {
   variant: Variant;
   week: WeekDay[];
   weekLabel: string;
+  /** Tapping the bell surfaces the coach check-in. */
+  onBell?: () => void;
 }
 
 const dotColor: Record<NonNullable<WeekDay['dot']>, string> = {
@@ -22,7 +24,7 @@ const dotColor: Record<NonNullable<WeekDay['dot']>, string> = {
 };
 
 /** Elevated header: profile/bell, week ring + label, calendar icon, week strip. */
-export function TodayHeader({ variant, week, weekLabel }: TodayHeaderProps) {
+export function TodayHeader({ variant, week, weekLabel, onBell }: TodayHeaderProps) {
   const insets = useSafeAreaInsets();
   const paused = variant === 'paused';
   const completed = variant === 'completed';
@@ -32,7 +34,11 @@ export function TodayHeader({ variant, week, weekLabel }: TodayHeaderProps) {
       <View style={styles.topRow}>
         <View style={styles.leftIcons}>
           <User size={24} color={colors.text} strokeWidth={1.7} />
-          {!completed && <Bell size={22} color={colors.text} strokeWidth={1.7} />}
+          {!completed && (
+            <Pressable hitSlop={10} onPress={onBell} accessibilityLabel="Coach notifications">
+              <Bell size={22} color={colors.text} strokeWidth={1.7} />
+            </Pressable>
+          )}
         </View>
 
         {paused ? (

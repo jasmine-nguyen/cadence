@@ -11,3 +11,7 @@ export { ProgressRing } from './ProgressRing';
 export { SegmentedProgress } from './SegmentedProgress';
 export { BottomSheet } from './BottomSheet';
 export { BackButton } from './BackButton';
+export { Toggle } from './Toggle';
+export { Slider } from './Slider';
+export { StatTile } from './StatTile';
+export { GradientTile } from './GradientTile';

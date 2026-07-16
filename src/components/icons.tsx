@@ -15,6 +15,7 @@ export {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
+  ChevronUp,
   User,
   Bell,
   Cloud,
@@ -49,6 +50,17 @@ export {
   PersonStanding,
   Clock,
   Activity,
+  Moon,
+  Flame,
+  Trophy,
+  MessageCircle,
+  Smile,
+  Meh,
+  Frown,
+  X,
+  Plus,
+  ListFilter,
+  Ruler,
 } from 'lucide-react-native';
 
 type GlyphProps = {
@@ -56,6 +68,35 @@ type GlyphProps = {
   color?: string;
   strokeWidth?: number;
 };
+
+/** Running shoe glyph (shoe mileage, settings). */
+export function Shoe({ size = 22, color = colors.accentCyan, strokeWidth = 1.7 }: GlyphProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M2 16l1-3 6-2 3-3 3 1 1 3 5 1v3H2Z"
+        stroke={color}
+        strokeWidth={strokeWidth}
+        strokeLinejoin="round"
+      />
+      <Path d="M9 11l2 3" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+/** 6-dot drag handle. */
+export function GripDots({ size = 16, color = colors.textMuted }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+      <Circle cx={9} cy={6} r={1.4} />
+      <Circle cx={15} cy={6} r={1.4} />
+      <Circle cx={9} cy={12} r={1.4} />
+      <Circle cx={15} cy={12} r={1.4} />
+      <Circle cx={9} cy={18} r={1.4} />
+      <Circle cx={15} cy={18} r={1.4} />
+    </Svg>
+  );
+}
 
 /** Filled completion disc — solid circle with a dark check (matches mocks). */
 export function CheckDisc({ size = 22, color = colors.accentGreen }: { size?: number; color?: string }) {
