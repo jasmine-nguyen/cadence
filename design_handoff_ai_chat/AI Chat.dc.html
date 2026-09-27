@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<![CDATA[<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; background:#101019; }
+  a { color:#7aa2f7; } a:hover { color:#7dcfff; }
+  * { box-sizing:border-box; }
+</style>
+</helmet>
+
+<section style="padding:52px 48px 80px;font-family:'Inter',sans-serif;color:#c0caf5;">
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:36px;max-width:760px;">
+    <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#565f89;font-weight:700;">Abundo · Insights</div>
+    <div style="font-family:'Inter Tight',sans-serif;font-size:28px;font-weight:800;letter-spacing:-.5px;">Ask about your spending</div>
+    <div style="font-size:14.5px;color:#a9b1d6;line-height:1.55;text-wrap:pretty;">A floating Ask button opens a chat sheet. It sits alongside the existing insights card: the card stays the passive per-cycle summary, the chat answers specific questions. "Analyse my spending" is the first suggested prompt, so both paths lead to the same place.</div>
+  </div>
+
+  <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start;">
+
+    <!-- PHONE 1: Insights + FAB -->
+    <div style="flex:none;display:flex;flex-direction:column;gap:12px;">
+      <div style="font-size:13px;font-weight:700;color:#7aa2f7;letter-spacing:.4px;margin-left:6px;">1 · INSIGHTS, BUTTON CLOSED</div>
+      <div style="width:392px;height:830px;background:#000;border-radius:56px;padding:13px;box-shadow:0 40px 80px -30px rgba(0,0,0,.7);">
+        <div style="width:100%;height:100%;background:#16161e;border-radius:44px;overflow:hidden;position:relative;display:flex;flex-direction:column;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 30px 4px;font-size:14px;font-weight:700;flex:none;">
+            <span>9:41</span><span style="width:44px;height:11px;border-radius:3px;border:1.2px solid #c0caf5;"></span>
+          </div>
+          <div style="height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;flex:none;">
+            <div style="width:36px;height:36px;border-radius:11px;background:#1f2335;display:flex;align-items:center;justify-content:center;">
+              <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#c0caf5" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </div>
+            <div style="font-family:'Inter Tight',sans-serif;font-size:17px;font-weight:700;">Insights</div>
+            <div style="width:36px;"></div>
+          </div>
+
+          <div style="flex:1;overflow:hidden;padding:6px 18px 0;display:flex;flex-direction:column;gap:16px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;background:#1a1b26;border-radius:11px;padding:3px;">
+              <div style="height:32px;border-radius:9px;background:#24283b;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;">Spending</div>
+              <div style="height:32px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#787c99;">Earning</div>
+            </div>
+
+            <div style="display:flex;justify-content:center;">
+              <div style="position:relative;width:168px;height:168px;border-radius:50%;background:conic-gradient(#f98f98 0 17%,#0bcbd3 17% 32%,#b5bb51 32% 44%,#98aeff 44% 55%,#f49964 55% 64%,#6eca89 64% 78%,#47c1f5 78% 88%,#bf9ff8 88% 100%);">
+                <div style="position:absolute;inset:30px;border-radius:50%;background:#16161e;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;">
+                  <div style="font-family:'Inter Tight',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.5px;">$2,418</div>
+                  <div style="font-size:11.5px;color:#787c99;">this cycle</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="background:#1f2030;border:1px solid rgba(122,162,247,.12);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:11px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#bb9af7;">Spending insights</div>
+                <div style="font-size:11.5px;color:#565f89;">Today</div>
+              </div>
+              <div style="font-size:14px;line-height:1.5;color:#c0caf5;text-wrap:pretty;">Eating Out is running 12% over pace with 9 days left in the cycle. Groceries and Transport are on track.</div>
+              <div style="display:flex;align-items:center;gap:14px;border-top:1px solid #24283b;padding-top:11px;">
+                <div style="font-size:13px;font-weight:600;color:#7aa2f7;">Re-analyse</div>
+                <sc-if value="{{ followUp }}" hint-placeholder-val="{{ true }}">
+                  <div style="font-size:13px;font-weight:600;color:#bb9af7;margin-left:auto;">Ask a follow-up →</div>
+                </sc-if>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:2px;">
+              <div style="display:flex;align-items:center;gap:12px;padding:10px 2px;border-bottom:1px solid #1f2335;">
+                <div style="width:10px;height:10px;border-radius:50%;background:#f98f98;flex:none;"></div>
+                <div style="flex:1;font-size:14.5px;font-weight:500;">Eating Out</div>
+                <div style="font-size:14.5px;font-weight:600;font-variant-numeric:tabular-nums;">$411</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;padding:10px 2px;">
+                <div style="width:10px;height:10px;border-radius:50%;background:#0bcbd3;flex:none;"></div>
+                <div style="flex:1;font-size:14.5px;font-weight:500;">Travel</div>
+                <div style="font-size:14.5px;font-weight:600;font-variant-numeric:tabular-nums;">$362</div>
+              </div>
+            </div>
+          </div>
+
+          <sc-if value="{{ pill }}">
+            <div style="position:absolute;right:18px;bottom:98px;height:50px;padding:0 20px 0 16px;border-radius:25px;background:linear-gradient(135deg,#7aa2f7,#bb9af7);display:flex;align-items:center;gap:8px;box-shadow:0 10px 24px -6px rgba(0,0,0,.6),0 0 0 1px rgba(192,202,245,.08);">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#16161e" strokeWidth="1.9" strokeLinejoin="round"><path d="M4 4.5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H10l-4.5 3.8V16.5H4a1 1 0 0 1-1-1v-10a1 1 0 0 1 1-1z"></path><path d="M12 7.6l.95 2.05 2.05.95-2.05.95L12 13.6l-.95-2.05L9 10.6l2.05-.95z" fill="#16161e" stroke="none"></path></svg>
+              <div style="font-size:15px;font-weight:700;color:#16161e;">Ask</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ icon }}" hint-placeholder-val="{{ true }}">
+            <div style="position:absolute;right:18px;bottom:98px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#7aa2f7,#bb9af7);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px -6px rgba(0,0,0,.6),0 0 0 1px rgba(192,202,245,.08);">
+              <svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="#16161e" strokeWidth="1.9" strokeLinejoin="round"><path d="M4 4.5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H10l-4.5 3.8V16.5H4a1 1 0 0 1-1-1v-10a1 1 0 0 1 1-1z"></path><path d="M12 7.6l.95 2.05 2.05.95-2.05.95L12 13.6l-.95-2.05L9 10.6l2.05-.95z" fill="#16161e" stroke="none"></path></svg>
+            </div>
+          </sc-if>
+
+          <div style="flex:none;border-top:1px solid #24283b;background:#1a1b26;display:grid;grid-template-columns:repeat(5,1fr);padding:9px 0 22px;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="#767d9e" strokeWidth="1.8" strokeLinejoin="round"><path d="M12 3a9 9 0 1 0 9 9h-9V3z"></path></svg><div style="font-size:10.5px;font-weight:500;color:#767d9e;">Budgets</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="#767d9e" strokeWidth="1.8" strokeLinecap="round"><path d="M8 6h11M8 12h11M8 18h11"></path><circle cx="4" cy="6" r="1.1" fill="#767d9e" stroke="none"></circle><circle cx="4" cy="12" r="1.1" fill="#767d9e" stroke="none"></circle><circle cx="4" cy="18" r="1.1" fill="#767d9e" stroke="none"></circle></svg><div style="font-size:10.5px;font-weight:500;color:#767d9e;">Transactions</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="#767d9e" strokeWidth="1.8" strokeLinecap="round"><rect x="2.5" y="6" width="19" height="12.5" rx="3"></rect><path d="M16 12.25h3.5"></path></svg><div style="font-size:10.5px;font-weight:500;color:#767d9e;">Accounts</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="#7aa2f7" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 12V4.5M12 12l6.5 3.6"></path></svg><div style="font-size:10.5px;font-weight:600;color:#7aa2f7;">Insights</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="#767d9e" strokeWidth="1.8"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4.6"></circle></svg><div style="font-size:10.5px;font-weight:500;color:#767d9e;">Goals</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHONE 2: Sheet, empty state -->
+    <div style="flex:none;display:flex;flex-direction:column;gap:12px;">
+      <div style="font-size:13px;font-weight:700;color:#7aa2f7;letter-spacing:.4px;margin-left:6px;">2 · CHAT OPEN, FIRST USE</div>
+      <div style="width:392px;height:830px;background:#000;border-radius:56px;padding:13px;box-shadow:0 40px 80px -30px rgba(0,0,0,.7);">
+        <div style="width:100%;height:100%;background:#0b0b10;border-radius:44px;overflow:hidden;position:relative;display:flex;flex-direction:column;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 30px 4px;font-size:14px;font-weight:700;flex:none;color:#787c99;">
+            <span>9:41</span><span style="width:44px;height:11px;border-radius:3px;border:1.2px solid #787c99;"></span>
+          </div>
+          <div style="flex:1;margin-top:16px;background:#1a1b26;border-radius:24px 24px 0 0;display:flex;flex-direction:column;overflow:hidden;">
+            <div style="display:flex;justify-content:center;padding:8px 0 2px;"><div style="width:38px;height:5px;border-radius:3px;background:#3b4261;"></div></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 18px 12px;">
+              <div style="font-family:'Inter Tight',sans-serif;font-size:17px;font-weight:700;">Ask Abundo</div>
+              <div style="width:32px;height:32px;border-radius:50%;background:#24283b;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#a9b1d6" strokeWidth="2.2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></div>
+            </div>
+
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:22px;padding:0 18px 18px;">
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="font-family:'Inter Tight',sans-serif;font-size:24px;font-weight:800;letter-spacing:-.5px;line-height:1.15;">What do you want to know about your spending?</div>
+                <div style="font-size:13.5px;color:#a9b1d6;line-height:1.5;">Answers come from your category totals and budgets, across your last 12 pay cycles.</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;align-items:center;gap:10px;background:#24283b;border-radius:14px;padding:13px 14px;">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="#bb9af7"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"></path></svg>
+                  <div style="font-size:14.5px;font-weight:600;">Analyse my spending</div>
+                </div>
+                <div style="background:#1f2335;border:1px solid #292e42;border-radius:14px;padding:13px 14px;font-size:14.5px;color:#c0caf5;">Average Eating Out over the last 3 months</div>
+                <div style="background:#1f2335;border:1px solid #292e42;border-radius:14px;padding:13px 14px;font-size:14.5px;color:#c0caf5;">Where did I overspend this cycle?</div>
+                <div style="background:#1f2335;border:1px solid #292e42;border-radius:14px;padding:13px 14px;font-size:14.5px;color:#c0caf5;">How does this cycle compare to last?</div>
+              </div>
+            </div>
+
+            <div style="flex:none;border-top:1px solid #24283b;padding:12px 14px 26px;display:flex;flex-direction:column;gap:9px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="flex:1;height:46px;border-radius:23px;background:#16161e;border:1px solid #292e42;display:flex;align-items:center;padding:0 16px;font-size:15px;color:#565f89;">Ask about your spending</div>
+                <div style="width:46px;height:46px;border-radius:50%;background:#24283b;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#565f89" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"></path></svg></div>
+              </div>
+              <div style="font-size:11.5px;color:#787c99;text-align:center;">Totals only, never transaction details · AI can make mistakes</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHONE 3: Conversation -->
+    <div style="flex:none;display:flex;flex-direction:column;gap:12px;">
+      <div style="font-size:13px;font-weight:700;color:#7aa2f7;letter-spacing:.4px;margin-left:6px;">3 · ANSWER</div>
+      <div style="width:392px;height:830px;background:#000;border-radius:56px;padding:13px;box-shadow:0 40px 80px -30px rgba(0,0,0,.7);">
+        <div style="width:100%;height:100%;background:#0b0b10;border-radius:44px;overflow:hidden;position:relative;display:flex;flex-direction:column;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 30px 4px;font-size:14px;font-weight:700;flex:none;color:#787c99;">
+            <span>9:41</span><span style="width:44px;height:11px;border-radius:3px;border:1.2px solid #787c99;"></span>
+          </div>
+          <div style="flex:1;margin-top:16px;background:#1a1b26;border-radius:24px 24px 0 0;display:flex;flex-direction:column;overflow:hidden;">
+            <div style="display:flex;justify-content:center;padding:8px 0 2px;"><div style="width:38px;height:5px;border-radius:3px;background:#3b4261;"></div></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 18px 12px;border-bottom:1px solid #24283b;">
+              <div style="font-family:'Inter Tight',sans-serif;font-size:17px;font-weight:700;">Ask Abundo</div>
+              <div style="width:32px;height:32px;border-radius:50%;background:#24283b;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#a9b1d6" strokeWidth="2.2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></div>
+            </div>
+
+            <div style="flex:1;display:flex;flex-direction:column;gap:16px;padding:18px 18px 16px;overflow:hidden;">
+              <div style="align-self:flex-end;max-width:82%;background:#7aa2f7;color:#16161e;border-radius:18px 18px 6px 18px;padding:11px 14px;font-size:14.5px;font-weight:500;line-height:1.45;">What was the average of my eating out budget in the last 3 months?</div>
+
+              <div style="display:flex;flex-direction:column;gap:12px;max-width:100%;">
+                <div style="font-size:14.5px;line-height:1.55;color:#c0caf5;text-wrap:pretty;">You averaged <span style="font-weight:700;">$214 per cycle</span> on Eating Out over your last 3 pay cycles. That's $14 over your $200 budget, mostly from June.</div>
+
+                <sc-if value="{{ rich }}" hint-placeholder-val="{{ true }}">
+                  <div style="background:#1f2030;border:1px solid rgba(122,162,247,.12);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:14px;">
+                    <div style="display:flex;align-items:flex-end;justify-content:space-between;">
+                      <div style="display:flex;flex-direction:column;gap:2px;">
+                        <div style="font-size:12px;color:#a9b1d6;display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:#f98f98;"></span>Eating Out · 3-cycle average</div>
+                        <div style="font-family:'Inter Tight',sans-serif;font-size:30px;font-weight:800;letter-spacing:-.8px;">$214</div>
+                      </div>
+                      <div style="font-size:12.5px;font-weight:700;color:#f7768e;padding-bottom:6px;">+$14 vs budget</div>
+                    </div>
+                    <div style="position:relative;height:124px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:end;padding:0 6px;">
+                      <div style="height:118px;border-radius:7px 7px 3px 3px;background:#f98f98;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;font-size:12px;font-weight:700;color:#16161e;font-variant-numeric:tabular-nums;">$238</div>
+                      <div style="height:109px;border-radius:7px 7px 3px 3px;background:#f98f98;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;font-size:12px;font-weight:700;color:#16161e;font-variant-numeric:tabular-nums;">$221</div>
+                      <div style="height:91px;border-radius:7px 7px 3px 3px;background:#f98f98;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;font-size:12px;font-weight:700;color:#16161e;font-variant-numeric:tabular-nums;">$183</div>
+                      <div style="position:absolute;left:0;right:0;bottom:99px;border-top:1.5px dashed #c0caf5;opacity:.7;"></div>
+                      <div style="position:absolute;right:6px;bottom:103px;font-size:10.5px;color:#a9b1d6;">$200 budget</div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;padding:0 6px;margin-top:-6px;">
+                      <div style="font-size:11.5px;color:#787c99;text-align:center;">Jun</div>
+                      <div style="font-size:11.5px;color:#787c99;text-align:center;">Jul</div>
+                      <div style="font-size:11.5px;color:#787c99;text-align:center;">Aug</div>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <div style="font-size:11.5px;color:#787c99;">3 completed pay cycles · 12 Jun – 11 Sep</div>
+
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <div style="height:34px;padding:0 13px;border-radius:17px;border:1px solid #3b4261;display:flex;align-items:center;font-size:13px;font-weight:600;color:#7aa2f7;">See Eating Out transactions</div>
+                  <div style="height:34px;padding:0 13px;border-radius:17px;border:1px solid #3b4261;display:flex;align-items:center;font-size:13px;font-weight:600;color:#c0caf5;">Compare to Cafes</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="flex:none;border-top:1px solid #24283b;padding:12px 14px 26px;display:flex;flex-direction:column;gap:9px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="flex:1;height:46px;border-radius:23px;background:#16161e;border:1px solid #292e42;display:flex;align-items:center;padding:0 16px;font-size:15px;color:#565f89;">Ask a follow-up</div>
+                <div style="width:46px;height:46px;border-radius:50%;background:#24283b;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#565f89" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"></path></svg></div>
+              </div>
+              <div style="font-size:11.5px;color:#787c99;text-align:center;">Totals only, never transaction details · AI can make mistakes</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHONE 4: Budgets, button on every tab -->
+    <div style="flex:none;display:flex;flex-direction:column;gap:12px;">
+      <div style="font-size:13px;font-weight:700;color:#7aa2f7;letter-spacing:.4px;margin-left:6px;">4 · BUDGETS, BUTTON ON EVERY TAB</div>
+      <div style="width:392px;height:830px;background:#000;border-radius:56px;padding:13px;box-shadow:0 40px 80px -30px rgba(0,0,0,.7);">
+        <div style="width:100%;height:100%;background:#16161e;border-radius:44px;overflow:hidden;position:relative;display:flex;flex-direction:column;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 30px 4px;font-size:14px;font-weight:700;flex:none;">
+            <span>9:41</span><span style="width:44px;height:11px;border-radius:3px;border:1.2px solid #c0caf5;"></span>
+          </div>
+          <div style="height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;flex:none;">
+            <div style="width:36px;height:36px;border-radius:11px;background:#1f2335;display:flex;align-items:center;justify-content:center;">
+              <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#c0caf5" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.830 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.650 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </div>
+            <div style="font-family:'Inter Tight',sans-serif;font-size:17px;font-weight:700;">Budgets</div>
+            <div style="width:36px;height:36px;border-radius:11px;background:#1f2335;display:flex;align-items:center;justify-content:center;color:#c0caf5;font-size:21px;line-height:1;">+</div>
+          </div>
+
+          <div style="flex:1;overflow:hidden;padding:6px 18px 0;display:flex;flex-direction:column;gap:14px;">
+            <div style="background:#1f2030;border:1px solid rgba(122,162,247,.12);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:4px;">
+              <div style="font-size:12.5px;color:#a9b1d6;">Left this cycle · 9 days to go</div>
+              <div style="font-family:'Inter Tight',sans-serif;font-size:30px;font-weight:800;letter-spacing:-.8px;">$1,582</div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;">
+              <div style="display:flex;flex-direction:column;gap:8px;padding:12px 2px;border-bottom:1px solid #1f2335;">
+                <div style="display:flex;align-items:center;gap:10px;"><div style="width:10px;height:10px;border-radius:50%;background:#f98f98;flex:none;"></div><div style="flex:1;font-size:14.5px;font-weight:500;">Eating Out</div><div style="font-size:13.5px;font-weight:600;color:#f7768e;font-variant-numeric:tabular-nums;">$411 / $400</div></div>
+                <div style="height:6px;border-radius:3px;background:#24283b;overflow:hidden;"><div style="width:100%;height:100%;background:#f98f98;"></div></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;padding:12px 2px;border-bottom:1px solid #1f2335;">
+                <div style="display:flex;align-items:center;gap:10px;"><div style="width:10px;height:10px;border-radius:50%;background:#8ec56f;flex:none;"></div><div style="flex:1;font-size:14.5px;font-weight:500;">Groceries</div><div style="font-size:13.5px;font-weight:600;color:#a9b1d6;font-variant-numeric:tabular-nums;">$284 / $500</div></div>
+                <div style="height:6px;border-radius:3px;background:#24283b;overflow:hidden;"><div style="width:57%;height:100%;background:#8ec56f;"></div></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;padding:12px 2px;border-bottom:1px solid #1f2335;">
+                <div style="display:flex;align-items:center;gap:10px;"><div style="width:10px;height:10px;border-radius:50%;background:#82b4ff;flex:none;"></div><div style="flex:1;font-size:14.5px;font-weight:500;">Transport</div><div style="font-size:13.5px;font-weight:600;color:#a9b1d6;font-variant-numeric:tabular-nums;">$96 / $180</div></div>
+                <div style="height:6px;border-radius:3px;background:#24283b;overflow:hidden;"><div style="width:53%;height:100%;background:#82b4ff;"></div></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;padding:12px 2px;border-bottom:1px solid #1f2335;">
+                <div style="display:flex;align-items:center;gap:10px;"><div style="width:10px;height:10px;border-radius:50%;background:#e8a24f;flex:none;"></div><div style="flex:1;font-size:14.5px;font-weight:500;">Cafes &amp; Coffee</div><div style="font-size:13.5px;font-weight:600;color:#a9b1d6;font-variant-numeric:tabular-nums;">$62 / $90</div></div>
+                <div style="height:6px;border-radius:3px;background:#24283b;overflow:hidden;"><div style="width:69%;height:100%;background:#e8a24f;"></div></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;padding:12px 2px;">
+                <div style="display:flex;align-items:center;gap:10px;"><div style="width:10px;height:10px;border-radius:50%;background:#d2ae45;flex:none;"></div><div style="flex:1;font-size:14.5px;font-weight:500;">Utilities</div><div style="font-size:13.5px;font-weight:600;color:#a9b1d6;font-variant-numeric:tabular-nums;">$140 / $220</div></div>
+                <div style="height:6px;border-radius:3px;background:#24283b;overflow:hidden;"><div style="width:64%;height:100%;background:#d2ae45;"></div></div>
+              </div>
+              <div style="height:72px;margin-top:4px;border:1.5px dashed #3b4261;border-radius:12px;display:flex;align-items:center;padding-left:14px;font-size:11.5px;color:#787c99;">72pt bottom padding, so the last row scrolls clear of the button</div>
+            </div>
+          </div>
+
+          <sc-if value="{{ pill }}" hint-placeholder-val="{{ true }}">
+            <div style="position:absolute;right:18px;bottom:98px;height:50px;padding:0 20px 0 16px;border-radius:25px;background:linear-gradient(135deg,#7aa2f7,#bb9af7);display:flex;align-items:center;gap:8px;box-shadow:0 10px 24px -6px rgba(0,0,0,.6),0 0 0 1px rgba(192,202,245,.08);">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#16161e" strokeWidth="1.9" strokeLinejoin="round"><path d="M4 4.5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H10l-4.5 3.8V16.5H4a1 1 0 0 1-1-1v-10a1 1 0 0 1 1-1z"></path><path d="M12 7.6l.95 2.050 2.05.95-2.05.95L12 13.6l-.95-2.05L9 10.6l2.05-.95z" fill="#16161e" stroke="none"></path></svg>
+              <div style="font-size:15px;font-weight:700;color:#16161e;">Ask</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ icon }}">
+            <div style="position:absolute;right:18px;bottom:98px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#7aa2f7,#bb9af7);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px -6px rgba(0,0,0,.6),0 0 0 1px rgba(192,202,245,.08);">
+              <svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="#16161e" strokeWidth="1.9" strokeLinejoin="round"><path d="M4 4.5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H10l-4.5 3.8V16.5H4a1 1 0 0 1-1-1v-10a1 1 0 0 1 1-1z"></path><path d="M12 7.6l.95 2.05 2.05.95-2.05.95L12 13.6l-.95-2.05L9 10.6l2.05-.95z" fill="#16161e" stroke="none"></path></svg>
+            </div>
+          </sc-if>
+
+          <div style="flex:none;border-top:1px solid #24283b;background:#1a1b26;display:grid;grid-template-columns:repeat(5,1fr);padding:9px 0 22px;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="#7aa2f7" strokeWidth="1.8" strokeLinejoin="round"><path d="M12 3a9 9 0 1 0 9 9h-9V3z"></path></svg><div style="font-size:10.5px;font-weight:600;color:#7aa2f7;">Budgets</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="#767d9e" strokeWidth="1.8" strokeLinecap="round"><path d="M8 6h11M8 12h11M8 18h11"></path><circle cx="4" cy="6" r="1.1" fill="#767d9e" stroke="none"></circle><circle cx="4" cy="12" r="1.1" fill="#767d9e" stroke="none"></circle><circle cx="4" cy="18" r="1.1" fill="#767d9e" stroke="none"></circle></svg><div style="font-size:10.5px;font-weight:500;color:#767d9e;">Transactions</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="#767d9e" strokeWidth="1.8" strokeLinecap="round"><rect x="2.5" y="6" width="19" height="12.5" rx="3"></rect><path d="M16 12.25h3.5"></path></svg><div style="font-size:10.5px;font-weight:500;color:#767d9e;">Accounts</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="#767d9e" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 12V4.5M12 12l6.5 3.6"></path></svg><div style="font-size:10.5px;font-weight:500;color:#767d9e;">Insights</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="#767d9e" strokeWidth="1.8"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4.6"></circle></svg><div style="font-size:10.5px;font-weight:500;color:#767d9e;">Goals</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1800,&quot;height&quot;:1060},&quot;fabStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Pill&quot;,&quot;Icon&quot;],&quot;default&quot;:&quot;Pill&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Entry point&quot;},&quot;cardLinksToChat&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Entry point&quot;},&quot;answerStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Number + chart&quot;,&quot;Text only&quot;],&quot;default&quot;:&quot;Number + chart&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Answer&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const fab = this.props.fabStyle ?? "Pill";
+    return {
+      icon: fab === "Icon",
+      pill: fab === "Pill",
+      rich: (this.props.answerStyle ?? "Number + chart") === "Number + chart",
+      followUp: this.props.cardLinksToChat ?? true
+    };
+  }
+}
+</script>
+</body>
+</html>
