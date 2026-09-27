@@ -5,6 +5,11 @@ Shared context for every card on the Cadence board. Claude Code: read this page 
 Notion data source: `collection://42eafeb3-4f0d-4a70-9a5b-3eeb0d6727a4`
 Card prefix: `CAD`
 Default card type: `Feature`
+
+## Card picking
+
+Sort field: `Order`
+Blocker relation: `Blocked by`
 Skip cards matching: `pending ADR-007`
 
 ## What we're building
