@@ -55,6 +55,11 @@ Then continue from step 3 below.
 4. Based on the user's choice, run the resume command shown in the output
    (e.g. `python3 build_graph.py --thread <id> --resume "go"`)
 
+   While the resumed script runs, relay progress the same way as step 2:
+   one short status line per node ("Implementer is coding...",
+   "Code review in progress...", etc.). Don't go silent — the user needs
+   to see the build is alive and which stage it's at.
+
 5. Repeat steps 3-4 until the script prints "Done."
 
 6. Once done, update the card's Status to 'Done' on the board.
