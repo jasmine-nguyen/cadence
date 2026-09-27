@@ -3,8 +3,9 @@ name: Client tests
 # Trigger economy (keeps Actions minutes down):
 #   - push only on `main` → feature branches are covered by their PR, so a branch
 #     push doesn't run CI a second time alongside the pull_request event.
-#   - pull_request with `paths` → runs only when Expo app files change; a
-#     backend-only PR skips it (python-tests.yml covers that side).
+#   - push and pull_request both path-filtered → runs only when Expo app files
+#     change; a backend-only or tooling-only change (e.g. .claude/) skips it
+#     (python-tests.yml covers the backend side). Keep the two lists in sync.
 # Caveat: if branch protection ever marks this a REQUIRED check, a path-skipped run
 # leaves the PR's check "pending" and can block merge — revisit paths if that's turned on.
 #
@@ -12,6 +13,16 @@ name: Client tests
 on:
   push:
     branches: [main]
+    paths:
+      - "src/**"
+      - "app/**"
+      - "package.json"
+      - "package-lock.json"
+      - "tsconfig.json"
+      - "babel.config.js"
+      - "app.json"
+      - "metro.config.js"
+      - ".github/workflows/client-tests.yml"
   pull_request:
     paths:
       - "src/**"
