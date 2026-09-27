@@ -1,0 +1,73 @@
+name: Client tests
+
+# Trigger economy (keeps Actions minutes down):
+#   - push only on `main` → feature branches are covered by their PR, so a branch
+#     push doesn't run CI a second time alongside the pull_request event.
+#   - pull_request with `paths` → runs only when Expo app files change; a
+#     backend-only PR skips it (python-tests.yml covers that side).
+# Caveat: if branch protection ever marks this a REQUIRED check, a path-skipped run
+# leaves the PR's check "pending" and can block merge — revisit paths if that's turned on.
+#
+# No Jest yet: when tests land, add a `test` job here (and a coverage floor later).
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - "src/**"
+      - "app/**"
+      - "package.json"
+      - "package-lock.json"
+      - "tsconfig.json"
+      # Bundling config: these decide how Metro resolves, so the bundle job must run
+      # when they change.
+      - "babel.config.js"
+      - "app.json"
+      - "metro.config.js"
+      - ".github/workflows/client-tests.yml"
+
+# Cancel an in-progress run when a newer commit lands on the same branch/PR.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typecheck:
+    name: typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+  # The typecheck doesn't BUILD the app, so a break in how modules resolve at bundle
+  # time (a bad babel alias, an ESM-only package, a native-only import) would pass it
+  # and only surface on a device build. This exports the phone JS bundle with Metro —
+  # no native toolchain, no EAS credits or token.
+  # iOS only: the app is iPhone-first and has no .ios/.android divergent files. Web is
+  # not set up (react-native-web isn't installed), so there is no web export.
+  bundle:
+    name: bundle
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the phone bundle
+        run: npx expo export -p ios --output-dir "$RUNNER_TEMP/expo-ios-export"
