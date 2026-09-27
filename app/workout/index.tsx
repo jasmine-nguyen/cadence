@@ -3,11 +3,12 @@ import { View, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Text, Button, BackButton, ScreenScroll } from '@/components';
-import { Share, Cloud, FileText, Play, Music2 } from '@/components/icons';
+import { Text, BackButton, ScreenScroll } from '@/components';
+import { Share, Cloud, FileText } from '@/components/icons';
 import { ActionRow } from '@/features/workout/ActionRow';
 import { StepBlock } from '@/features/workout/WorkoutSteps';
 import { SkipSheet } from '@/features/workout/SkipSheet';
+import { WatchGuidance } from '@/features/workout/WatchGuidance';
 import { useStore } from '@/state/store';
 import { seedWorkout } from '@/state/data';
 import { SkipReason } from '@/state/types';
@@ -41,7 +42,7 @@ export default function WorkoutDetail() {
       />
 
       <ScreenScroll
-        contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: 130 + insets.bottom }}
+        contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: insets.bottom + 32 }}
       >
         <View style={styles.topBar}>
           <View style={styles.topLeft}>
@@ -85,6 +86,8 @@ export default function WorkoutDetail() {
           </View>
         </View>
 
+        <WatchGuidance style={styles.watchHint} />
+
         <View style={styles.actionWrap}>
           <ActionRow onSkip={() => setSkipOpen(true)} />
         </View>
@@ -104,20 +107,6 @@ export default function WorkoutDetail() {
           ))}
         </View>
       </ScreenScroll>
-
-      {/* Footer: Start workout + music */}
-      <View style={[styles.footer, { bottom: insets.bottom + 12 }]}>
-        <Button
-          label="Start workout"
-          floating
-          style={styles.startBtn}
-          onPress={() => router.push('/workout/live')}
-          icon={<Play size={17} color={colors.onAccent} fill={colors.onAccent} strokeWidth={0} />}
-        />
-        <View style={styles.musicBtn}>
-          <Music2 size={22} color={colors.text} strokeWidth={1.8} />
-        </View>
-      </View>
 
       <SkipSheet visible={skipOpen} onDismiss={() => setSkipOpen(false)} onConfirm={onConfirmSkip} />
     </View>
@@ -160,6 +149,7 @@ const styles = StyleSheet.create({
   },
   weatherText: { flex: 1 },
   weatherDetail: { marginTop: 2 },
+  watchHint: { marginHorizontal: screenPadding.content, marginTop: 12 },
   actionWrap: { paddingHorizontal: 14, marginTop: 18 },
   divider: { height: 1, backgroundColor: colors.stroke, marginHorizontal: screenPadding.content, marginTop: 18 },
   descHead: {
@@ -170,21 +160,4 @@ const styles = StyleSheet.create({
     marginTop: 18,
   },
   blocks: { paddingHorizontal: screenPadding.content, marginTop: 10, gap: 10 },
-  footer: {
-    position: 'absolute',
-    left: screenPadding.content,
-    right: screenPadding.content,
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'center',
-  },
-  startBtn: { flex: 1 },
-  musicBtn: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: colors.card,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
 });
