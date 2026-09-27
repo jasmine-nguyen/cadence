@@ -25,7 +25,7 @@ Requires the iOS toolchain (Xcode / simulator) to run natively.
 | **Onboarding** | Step 1 (About you) · Step 2 (Background) · Step 3 (Goal) · Generating |
 | **Login / Auth** | Login · Login error (inline invalid credentials) · 2-step verification |
 | **Today** | Planned · Paused · Completed · Empty · Error |
-| **Workout Detail** | Default · Skip bottom sheet · In-progress live session |
+| **Workout Detail** | Default · Skip bottom sheet |
 | **Plan / Calendar** | Week view · Multi-week · Reschedule (long-press drag) · Paused |
 | **Insights** | Dashboard (5 metrics + shoe) · Building (locked/early) |
 | **Activities** | List · Detail (stats + splits) · Empty |
@@ -57,7 +57,7 @@ app/
   onboarding/            Steps 1–3 (stack)
   generating.tsx         Loading state → auto-advances to Today
   (tabs)/                Today · Plan · Activities · Insights · Settings
-  workout/               Workout Detail (+ skip sheet) · live (in-progress)
+  workout/               Workout Detail (+ skip sheet)
   activity/[id].tsx      Activity detail (pushed)
   feedback.tsx           Post-workout feedback (transparent modal)
   checkin.tsx            Missed-session check-in (modal)
@@ -65,8 +65,10 @@ app/
 
 Flow: **Login → (2FA) → Today**, and **Create account / Create your plan →
 Onboarding → Generating → Today**. From Today, the workout card opens **Workout
-Detail**; "Start workout" opens the **live session**; the tab bar switches
-between Today / Plan / Activities / Insights / Settings.
+Detail**. Workouts are started and recorded on the **COROS watch** (the plan is
+already synced), so there is no in-app live session; Today and Workout Detail
+show a "Start this on your watch" hint instead. The tab bar switches between
+Today / Plan / Activities / Insights / Settings.
 
 ## Foundation
 

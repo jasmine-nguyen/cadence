@@ -9,7 +9,7 @@ This bundle is the **complete app** — the four core-flow screens plus the six 
 1. **Onboarding & Goal Setup** (3 steps + generating)
 2. **Login / Sign-up** (+ 2FA + error)
 3. **Today** (planned / paused / completed / empty / error)
-4. **Workout Detail** (+ skip sheet + in-progress)
+4. **Workout Detail** (+ skip sheet; ~~in-progress~~ removed — see CAD-92)
 
 **Completes the app**
 5. **Plan / Calendar** (week view / multi-week / reschedule / paused)
@@ -31,7 +31,7 @@ Claude Code: tick a box (`[x]`) when a screen is implemented and matches its scr
 | 1 | Onboarding & Goal Setup | step 1 · step 2 · step 3 · generating | [x] | PR #2 |
 | 2 | Login / Sign-up | login · 2FA · error | [x] | PR #2 |
 | 3 | Today | planned · paused · completed · empty · error | [x] | PR #2 |
-| 4 | Workout Detail | default · skip sheet · in-progress | [x] | PR #2 |
+| 4 | Workout Detail | default · skip sheet · ~~in-progress~~ | [x] | PR #2 · in-progress removed by decision (CAD-92): workouts start & record on the COROS watch |
 | 5 | Plan / Calendar | week view · multi-week · reschedule · paused | [x] | PR #2 · long-press drag |
 | 6 | Insights Dashboard | dashboard · building | [x] | PR #2 |
 | 7 | Activity History | list · detail · empty | [x] | PR #2 |
@@ -123,7 +123,7 @@ Capture profile → running background → goal, then generate the plan.
 ### 3 · Today
 Daily home — today's workout, the *why*, weather, quick progress. **"Why today" briefing is new.**
 **Header** (`bgElevated`, rounded bottom 24): profile + bell icons; centered progress ring (cyan arc) + "Week 1/4 ▾"; calendar-grid icon. Below: **7-day week strip** (Mon–Sun) with status dots (green done/scheduled, cyan today); today = filled `text` disc.
-**Body:** "Today's workout" + weather (cloud + "13°"); **workout card** (`card`, radius 20) with **green left accent rail** (7px, gradient fading down), title "Walk-Run", meta, top-right empty checkbox, **"WHY TODAY"** panel (`cardInsetDeep`, cyan bulb + cyan overline + purpose copy), "View full workout" row → Detail. **Week overview card** (4-segment bar + "Workouts 1/4 · Distance 3/11 km"). **Start workout** floating cyan CTA (radius 38, glow). Tab bar (Today active).
+**Body:** "Today's workout" + weather (cloud + "13°"); **workout card** (`card`, radius 20) with **green left accent rail** (7px, gradient fading down), title "Walk-Run", meta, top-right empty checkbox, **"WHY TODAY"** panel (`cardInsetDeep`, cyan bulb + cyan overline + purpose copy), "View full workout" row → Detail. **Week overview card** (4-segment bar + "Workouts 1/4 · Distance 3/11 km"). **Watch guidance** card under the workout card (`cardInset`, watch icon tile, "Start this on your watch" + muted "It's already synced to your COROS."; non-interactive, no cyan). *(Replaces the floating cyan Start workout CTA — CAD-92.)* Tab bar (Today active).
 - **Paused.** Header gold ⏸ + "Paused"; week strip dimmed ~0.45; gold paused banner (`rgba(224,175,104,.12)` / `.35` border) with "Your plan is paused" + copy + **Resume plan** cyan CTA; dimmed "Where you left off" (Week 1 of 4 · Workouts 1/4 · Streak 2 days) + calm note. No Start CTA.
 - **Completed.** Card → green rail + filled green check + "COMPLETED" chip + stats (distance/time/avg pace). Cyan "NICE WORK" card with **How did it feel?** (→ Feedback) + **Summary**. Week overview → 2/4.
 - **Empty.** Simplified header (no week strip), centered calendar-plus glyph, "No plan yet", **Create your plan** CTA (→ Onboarding).
@@ -135,9 +135,9 @@ Structured session — warm-up, run/walk repeats, cool-down — with skip.
 - **Weather/readiness card:** cyan cloud tile + "13° & cloudy at 6pm · good to go" + "0% rain".
 - **Action row:** 4 circular actions — WARM-UP STRETCHES, ADD ROUTE, LINK ACTIVITY, **SKIP WORKOUT** (red icon + `rgba(247,118,142,.4)` ring + red label).
 - **Description:** step blocks (`card`, radius 14) — **Warm-Up** (`stroke` header strip), **Repeat ×2** (`linear-gradient(90deg,#9ece6a,#2ac3de)` header + repeat icon; RUN rows green, WALK rows muted), **Cool-down** (dimmed).
-- **Footer:** **Start workout** cyan CTA + circular music button.
+- **Watch guidance:** inline under the weather card — same non-interactive "Start this on your watch" card as Today. No footer: the Start workout CTA and music button were removed (CAD-92).
 - **Skip sheet.** Screen dims/blurs; sheet rises — red arrow tile, H2 "Skip this workout?", copy, single-select reason list (selected "Too busy today" cyan), destructive **Skip workout** red CTA, "Keep it" dismiss.
-- **In-progress.** Status row ("Interval 3 / 7"), phase label ("RUN · CONVERSATIONAL"), large green interval ring + countdown, live Distance / Pace / Heart rate, "Next: …" strip, control cluster (music · gold **pause** · red **stop**).
+- **Removed (CAD-92)** — workouts are started and recorded on the COROS watch, so Cadence has no live session. Original spec kept for reference: **In-progress.** Status row ("Interval 3 / 7"), phase label ("RUN · CONVERSATIONAL"), large green interval ring + countdown, live Distance / Pace / Heart rate, "Next: …" strip, control cluster (music · gold **pause** · red **stop**).
 
 ### 5 · Plan / Calendar
 Weekly primary view; scroll multiple weeks; drag to reschedule; progress; pause + paused state. Tab: **Plan**.
@@ -166,7 +166,7 @@ Completed runs list → tappable detail. Tab: **Activities**.
 - **Empty.** Green run-figure glyph tile, "No runs yet", copy, **Go to today's workout** cyan CTA.
 
 ### 8 · Post-Workout Feedback
-Quick effort check reached from Today·Completed (and end of a live workout).
+Quick effort check reached from Today·Completed.
 - **Prompt (bottom sheet over completed workout).** Backdrop dim+blur. Grab handle. H2 "How did it feel?" + copy. **Three big options**: **Easy** (green smile), **Just right** (cyan neutral, selected = cyan border+tint), **Hard** (gold frown). Optional **note field** ("Add a note (optional)…"). **Save feedback** cyan CTA + "Skip" text button. This is the beginner-friendly RPE — maps to Runna's thumbs but softer.
 - **Saved.** Green success disc + check, "Logged — nice work", "You marked this one **just right**. Your coach will keep Friday at a similar effort." **Next up** card (cyan clock tile + "Friday · Walk-Run · 2.5 km"). **Back to today** cyan CTA.
 
@@ -187,8 +187,8 @@ Daily reminder, shoe threshold, pause, connections. Tab: **Settings**. Scrollabl
 ## Interactions & Behavior
 - **Onboarding:** Continue advances 1→2→3; back returns. Tap-to-select (single for ability/goal/frequency, multi for injuries). "Build my plan" → Generating → auto-advances to Today.
 - **Login:** Continue validates → Today (trusted) or 2FA. Social = native Apple/Google. 2FA auto-advances focus; Verify enabled at 6 digits; resend disabled until countdown 0.
-- **Today:** workout card / "View full workout" → Workout Detail. Start → live session. Completed → How did it feel? → Feedback. Tabs switch roots. Resume plan restores schedule.
-- **Workout Detail:** Skip → sheet (slide-up + backdrop fade); confirm marks skipped + returns to Today; "Keep it" dismisses. Start → in-progress; pause/stop control the live session.
+- **Today:** workout card / "View full workout" → Workout Detail. Completed → How did it feel? → Feedback. Tabs switch roots. Resume plan restores schedule.
+- **Workout Detail:** Skip → sheet (slide-up + backdrop fade); confirm marks skipped + returns to Today; "Keep it" dismisses. No Start action — the workout is started on the COROS watch.
 - **Plan:** week chips switch the visible week; vertical scroll pages weeks. **Long-press a session card → drag to another day → release to reschedule**; the coach re-balances the rest of the week (use the repo's draggable/reorderable list or a gesture-handler pan). Pause control → pause sheet.
 - **Insights:** read-only; cards populate as data arrives (COROS/Intervals + logged runs). Shoe card nudges to replace once mileage nears the Settings threshold. Building state upgrades to full dashboard automatically.
 - **Activities:** tap a row → Detail. Filter icon opens type/date filters (not drawn — use the repo's filter pattern).
@@ -200,7 +200,7 @@ Daily reminder, shoe threshold, pause, connections. Tab: **Settings**. Scrollabl
 - **Onboarding:** step 1/2/3 defaults; **loading** (Generating). Validation soft (all optional).
 - **Login:** default; **error** (invalid creds, inline red); **2FA**.
 - **Today:** **planned · paused · completed · empty · error.**
-- **Workout Detail:** default · **skip sheet** · **in-progress.**
+- **Workout Detail:** default · **skip sheet**. (~~in-progress~~ removed — CAD-92.)
 - **Plan:** **week view · multi-week · reschedule (dragging) · paused.**
 - **Insights:** **dashboard (populated) · building (early/locked).**
 - **Activities:** **list · detail · empty.**
@@ -214,7 +214,7 @@ Daily reminder, shoe threshold, pause, connections. Tab: **Settings**. Scrollabl
 - `auth`: `{ email, session, needs2fa, code[6], resendCountdown, error }`
 - `plan`: `{ weeks[], currentWeek, status:'active'|'paused', pausedAt, pauseDuration, progress{workoutsDone,workoutsTotal,distanceDone,distanceTotal,streak} }` — `weeks[].days[]` = `{ date, type:'run'|'walk'|'long'|'rest', title, distance, duration, status:'done'|'today'|'upcoming'|'skipped'|'onhold' }`
 - `today`: derived → today's `workout` + `briefing(why)` + `weather`
-- `workoutDetail`: `{ steps[], skipSheetOpen, skipReason }`, `liveSession`: `{ interval, totalIntervals, phase, elapsed, distance, pace, hr, paused }`
+- `workoutDetail`: `{ steps[], skipSheetOpen, skipReason }`, ~~`liveSession`~~ (removed — CAD-92; no in-app live session)
 - `activities`: `[{ id, date, type, distance, movingTime, avgPace, avgHr, felt, splits[] }]`
 - `insights`: `{ consistency, weeklyVolume{km,deltaPct,bars[]}, easyPct, recovery{restHr,hrv,sleep,readiness}, benchmark{value,delta}, shoe{name,km,threshold} }` — `dataReady` flags drive the building state
 - `feedback`: `{ workoutId, felt:'easy'|'just_right'|'hard', note }`
@@ -237,7 +237,7 @@ Daily reminder, shoe threshold, pause, connections. Tab: **Settings**. Scrollabl
   - `04-today-planned-and-paused.png`
   - `05-today-completed-empty-error.png`
   - `06-workout-detail-and-skip.png`
-  - `07-workout-in-progress.png`
+  - `07-workout-in-progress.png` (historical — screen removed, CAD-92)
   - `08-plan-week-multiweek-reschedule-paused.png`
   - `09-insights-dashboard-building.png`
   - `10-activities-list-detail-empty.png`

@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text, Button, ScreenScroll } from '@/components';
-import { Cloud, Play, User, CalendarPlus } from '@/components/icons';
+import { Cloud, User, CalendarPlus } from '@/components/icons';
 import { TodayHeader } from '@/features/today/TodayHeader';
 import {
   PlannedWorkoutCard,
@@ -19,9 +19,10 @@ import {
   SyncErrorBanner,
 } from '@/features/today/TodayBlocks';
 import { TodayStateSwitcher } from '@/features/today/TodayStateSwitcher';
+import { WatchGuidance } from '@/features/workout/WatchGuidance';
 import { useStore } from '@/state/store';
 import { seedWorkout } from '@/state/data';
-import { colors, radius as radii, screenPadding, shadows } from '@/theme';
+import { colors, radius as radii, screenPadding } from '@/theme';
 
 /** Section header "Today's workout" + weather. */
 function SectionHeader({ temp }: { temp?: string }) {
@@ -62,7 +63,6 @@ export default function Today() {
   const openWorkout = () => router.push('/workout');
 
   let content: React.ReactNode;
-  let floatingCta: React.ReactNode = null;
 
   switch (todayState) {
     case 'planned':
@@ -77,19 +77,10 @@ export default function Today() {
           <ScreenScroll contentContainerStyle={[styles.body, bodyPad]}>
             <SectionHeader temp={seedWorkout.weather.temp} />
             <PlannedWorkoutCard workout={seedWorkout} onOpen={openWorkout} />
+            <WatchGuidance style={styles.watchHint} />
             <WeekOverviewCard week={plan.currentWeek} progress={plan.progress} />
           </ScreenScroll>
         </>
-      );
-      floatingCta = (
-        <View style={[styles.floating, { bottom: insets.bottom + 24 }]}>
-          <Button
-            label="Start workout"
-            floating
-            onPress={() => router.push('/workout/live')}
-            icon={<Play size={18} color={colors.onAccent} fill={colors.onAccent} strokeWidth={0} />}
-          />
-        </View>
       );
       break;
 
@@ -168,7 +159,6 @@ export default function Today() {
   return (
     <View style={styles.root}>
       {content}
-      {floatingCta}
       {__DEV__ && <TodayStateSwitcher />}
     </View>
   );
@@ -199,12 +189,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   simpleTitle: { fontSize: 20 },
-  floating: {
-    position: 'absolute',
-    left: screenPadding.content,
-    right: screenPadding.content,
-    ...shadows.ctaGlow,
-  },
+  watchHint: { marginTop: 14 },
   emptyWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40 },
   emptyTile: {
     width: 96,
