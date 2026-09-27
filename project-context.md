@@ -11,7 +11,7 @@ Skip cards matching: `pending ADR-007`
 
 A nightly job that reads Jas's COROS health and training data, asks Claude to adjust her weekly running + strength plan, and writes the plan back to COROS (and, pending ADR-007, pushes strength workouts to her Speediance Gym Monster 2). A React Native client app comes later (Phase 3).
 
-The Expo app already exists: all 30 frames are built (PR #2), running on seeded data in `src/state/data.ts`. Phase 3 is connecting it to real data, not building screens. Design reference: `design_handoff_full_app/`.
+The Expo app already exists: all 30 frames are built (PRs #2 and #3), running on seeded data in `src/state/data.ts`. Phase 3 is connecting it to real data, not building screens. Design reference: `design_handoff_full_app/`.
 
 Three goals shape scope: (1) a real app Jas uses, (2) a portfolio piece for architect interviews, (3) hands-on AWS Solutions Architect practice. Don't over-build for multiple users, but keep a `user_id` on data.
 
