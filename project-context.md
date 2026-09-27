@@ -2,7 +2,7 @@ Shared context for every card on the Cadence board. Claude Code: read this page 
 
 ## Board
 
-Notion data source: <!-- TODO: add cadence board collection ID here -->
+Notion data source: `collection://42eafeb3-4f0d-4a70-9a5b-3eeb0d6727a4`
 
 ## What we're building
 
