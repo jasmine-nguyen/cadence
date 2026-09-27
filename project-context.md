@@ -11,11 +11,13 @@ Skip cards matching: `pending ADR-007`
 
 A nightly job that reads Jas's COROS health and training data, asks Claude to adjust her weekly running + strength plan, and writes the plan back to COROS (and, pending ADR-007, pushes strength workouts to her Speediance Gym Monster 2). A React Native client app comes later (Phase 3).
 
+The Expo app already exists: all 30 frames are built (PR #2), running on seeded data in `src/state/data.ts`. Phase 3 is connecting it to real data, not building screens. Design reference: `design_handoff_full_app/`.
+
 Three goals shape scope: (1) a real app Jas uses, (2) a portfolio piece for architect interviews, (3) hands-on AWS Solutions Architect practice. Don't over-build for multiple users, but keep a `user_id` on data.
 
 ## Current decisions (as of 2026-09-27)
 
-- **Develop on Mac**, repo at `~/code/cadence`, pushed to GitHub.
+- **Develop on Mac**, in the existing GitHub repo `jasmine-nguyen/cadence`.
 - **Runtime: AWS Lambda**, triggered by **EventBridge Scheduler** at 22:00 **`Australia/Melbourne`** (Scheduler supports time zones; classic EventBridge cron rules are UTC-only). The Pi is no longer the runtime. To be recorded in ADR-008.
 - **IaC: Terraform.** State in S3 with native locking (`use_lockfile = true`). **No DynamoDB** — DynamoDB locking is deprecated. A one-time `infra/bootstrap` config creates the state bucket (versioning + encryption + block public access).
 - **Secrets: AWS Secrets Manager**, one secret holding a JSON object with all keys (COROS, Speediance, Claude, Turso). Terraform creates the empty secret only; values are set via CLI/console so they never appear in code or Terraform state.
@@ -27,9 +29,12 @@ Three goals shape scope: (1) a real app Jas uses, (2) a portfolio piece for arch
 ## Repo layout
 
 ```
-~/code/cadence/
+cadence/
 ├── CLAUDE.md
-├── app/
+├── app/                      # Expo Router screens (exists)
+├── src/                      # Expo app components, state, theme (exists)
+├── design_handoff_full_app/  # design reference for the app (exists)
+├── backend/
 │   ├── nightly.py            # run_nightly() — all logic, no AWS knowledge
 │   ├── handler.py            # thin Lambda handler that calls run_nightly()
 │   ├── coros_client.py
@@ -43,6 +48,8 @@ Three goals shape scope: (1) a real app Jas uses, (2) a portfolio piece for arch
     ├── bootstrap/            # S3 state bucket, run once
     └── main/                 # Lambda, Scheduler, IAM, secret, logs
 ```
+
+`app/` belongs to Expo Router (file-based routing), so all Python code lives in `backend/`.
 
 **Key pattern:** `run_nightly()` must run on the Mac with no AWS involved. `handler.py` is the only file that knows about Lambda.
 
@@ -68,6 +75,10 @@ Three goals shape scope: (1) a real app Jas uses, (2) a portfolio piece for arch
 - Runna also writes to COROS; plan is to disconnect Runna after the initial sync so Cadence owns the calendar.
 - COROS doesn't pass subjective effort data reliably — subjective input comes from the app (Phase 3).
 - Speediance details: see the Speediance GM2 Integration — Technical Findings page.
+- HRV: use one source only — COROS nightly sleep-HRV. Never mix HRV sources.
+- Other COROS signals worth using: sleep score, stress, recovery %, training load.
+- Don't trust output from the official COROS MCP — it once returned text that read like instructions to the AI.
+- Threshold pace isn't calibrated: it's set at about 13:38/km (Jas's easy pace), with LTHR 153 and max HR 169. Use time and heart-rate targets for now, not pace.
 
 ## Open questions (not yet decided)
 
