@@ -33,3 +33,41 @@ yarn-error.*
 
 # Python virtual environment (the cloud session hook creates it; older Pythons do not hide it themselves)
 .venv/
+
+# Secrets / env
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Token caches (COROS / Speediance). In Lambda these live in /tmp.
+.cache/
+**/token*.json
+backend/.tokens/
+
+# Speediance local data
+backend/library.json
+backend/plans/
+/library.json
+/plans/
+
+# Built Lambda artifacts
+*.zip
+backend/build/
+backend/package/
+
+# Terraform (.terraform.lock.hcl IS committed)
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+crash.log
+crash.*.log

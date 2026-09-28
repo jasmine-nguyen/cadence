@@ -14,7 +14,7 @@ Skip cards matching: `pending ADR-007`
 
 ## What we're building
 
-A nightly job that reads Jas's COROS health and training data, asks Claude to adjust her weekly running + strength plan, and writes the plan back to COROS (and, pending ADR-007, pushes strength workouts to her Speediance Gym Monster 2). A React Native client app comes later (Phase 3).
+A nightly job that reads Jas's COROS health and training data, asks Claude to adjust her weekly running + strength plan, and writes the plan back to COROS (and, pending ADR-007, pushes strength workouts to her Speediance Gym Monster 2). An Expo (React Native) client app shows the plan; Phase 3 connects it to real data.
 
 The Expo app already exists: all 30 frames are built (PRs #2 and #3), running on seeded data in `src/state/data.ts`. Phase 3 is connecting it to real data, not building screens. Design reference: `design_handoff_full_app/`.
 
