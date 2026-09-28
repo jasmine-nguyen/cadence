@@ -1,0 +1,41 @@
+name: TestFlight
+
+# Manual trigger only: every run spends an EAS build credit, so it isn't wired to
+# push. Run it from the Actions tab ("Run workflow").
+#
+# The build runs on EAS servers, not here: --no-wait queues it and exits, so the
+# runner is done in about a minute. --auto-submit hands the finished build to
+# `eas submit`, which uploads it to App Store Connect / TestFlight.
+#
+# Needs the EXPO_TOKEN repo secret, plus iOS credentials and an App Store Connect
+# API key already stored on EAS (CI can't answer the interactive Apple prompts).
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-submit:
+    name: build and submit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      # EAS reads the Expo config, which resolves plugins from node_modules.
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Queue iOS build with auto-submit
+        run: eas build --platform ios --profile production --non-interactive --no-wait --auto-submit

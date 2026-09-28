@@ -4,17 +4,29 @@
     "slug": "cadence",
     "version": "0.1.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "scheme": "cadence",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#1a1b26",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.cadence.app"
+      "bundleIdentifier": "jasmine.cadence.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "plugins": ["expo-router"],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "5e7c5651-f70a-4930-928c-12a221766336"
+      }
+    },
+    "owner": "ramen_broth"
   }
 }
