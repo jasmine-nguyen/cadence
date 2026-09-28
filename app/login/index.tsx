@@ -19,8 +19,9 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   const onContinue = () => {
-    // Soft validation → inline invalid-credentials error, else 2FA.
-    if (!email.trim() || password.length < 6) {
+    // No backend yet, so any password passes; only an empty email shows the
+    // inline invalid-credentials error. Else 2FA.
+    if (!email.trim()) {
       setError('Incorrect email or password. Try again.');
       return;
     }
