@@ -66,8 +66,12 @@ reviewer sees it. They mirror `client-tests.yml`. `npm run lint` isn't here yet:
 it fails on existing errors in `app/(tabs)/`, and without an ESLint config
 `expo lint` installs one and edits `package.json`.
 
+The typecheck clears `.expo/types` first. That cache of route types is only
+refreshed by the dev server, so it goes stale whenever a build adds a screen;
+CI never has it, so this matches CI.
+
 ```checks
-npm run typecheck
+rm -rf .expo/types && npm run typecheck
 npx expo export -p ios --output-dir "$(mktemp -d)"
 # Once backend/ has tests: PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring python3 -m pytest
 ```
