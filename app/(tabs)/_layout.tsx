@@ -18,6 +18,8 @@ export default function TabsLayout() {
         },
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
         sceneStyle: { backgroundColor: colors.bg },
+        // Tabs don't animate by default; cross-fade so switching doesn't snap.
+        animation: 'fade',
       }}
     >
       <Tabs.Screen
