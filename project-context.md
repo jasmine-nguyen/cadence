@@ -58,6 +58,20 @@ cadence/
 
 **Key pattern:** `run_nightly()` must run on the Mac with no AWS involved. `handler.py` is the only file that knows about Lambda.
 
+## Checks
+
+The build runs these after every implementation round, from the repo root, one
+per line. Any non-zero exit sends the work back to the implementer before a
+reviewer sees it. They mirror `client-tests.yml`. `npm run lint` isn't here yet:
+it fails on existing errors in `app/(tabs)/`, and without an ESLint config
+`expo lint` installs one and edits `package.json`.
+
+```checks
+npm run typecheck
+npx expo export -p ios --output-dir "$(mktemp -d)"
+# Once backend/ has tests: PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring python3 -m pytest
+```
+
 ## Lambda constraints
 
 - Only `/tmp` is writable. Put token caches there (e.g. `SPEEDIANCE_TOKEN_CACHE=/tmp/speediance/token.json`, COROS tokens likewise). Expect a fresh login after cold starts.
