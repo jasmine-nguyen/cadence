@@ -80,5 +80,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # expo export refuses an output dir outside the project; dist/ is gitignored.
       - name: Build the phone bundle
-        run: npx expo export -p ios --output-dir "$RUNNER_TEMP/expo-ios-export"
+        run: npx expo export -p ios --output-dir dist

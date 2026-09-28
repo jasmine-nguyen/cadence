@@ -1,8 +1,7 @@
 import React from 'react';
-import { Stack } from 'expo-router';
+import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { ThemeProvider, DarkTheme } from '@react-navigation/native';
 import { StoreProvider } from '@/state/store';
 import { colors } from '@/theme';
 
