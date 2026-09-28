@@ -60,11 +60,12 @@ cadence/
 
 ## Checks
 
-The build runs these after every implementation round, from the repo root, one
-per line. Any non-zero exit sends the work back to the implementer before a
-reviewer sees it. They mirror `client-tests.yml`. `npm run lint` isn't here yet:
-it fails on existing errors in `app/(tabs)/`, and without an ESLint config
-`expo lint` installs one and edits `package.json`.
+The build runs these after every implementation round and once more before it
+pushes, from the repo root, one per line. Any non-zero exit sends the work back
+to the implementer. The build won't start without this block. They mirror
+`client-tests.yml`. `npm run lint` isn't here yet: it fails on existing errors
+in `app/(tabs)/`, and without an ESLint config `expo lint` installs one and
+edits `package.json`.
 
 The typecheck clears `.expo/types` first. That cache of route types is only
 refreshed by the dev server, so it goes stale whenever a build adds a screen;
