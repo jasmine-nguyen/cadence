@@ -83,7 +83,7 @@ export function VolumeEasyRow({
         </Text>
         <Text style={styles.metricBig}>
           {volume.km}
-          <Text variant="bodySmall" color="textMuted">{' km'}</Text>
+          <Text variant="meta" color="textMuted" style={styles.unit}>{' km'}</Text>
         </Text>
         <DeltaUp label={`${volume.deltaPct} vs last wk`} />
         <View style={styles.miniBars}>
@@ -105,7 +105,7 @@ export function VolumeEasyRow({
         </Text>
         <Text style={styles.metricBig}>
           {easyPct}
-          <Text variant="bodySmall" color="textMuted">{' %'}</Text>
+          <Text variant="meta" color="textMuted" style={styles.unit}>{' %'}</Text>
         </Text>
         <Text variant="meta" weight="500" color="accentGreen" style={styles.easyNote}>
           Kept easy — nice
@@ -254,6 +254,8 @@ const styles = StyleSheet.create({
   twoUp: { flexDirection: 'row', gap: 12 },
   half: { flex: 1 },
   metricBig: { fontSize: 24, fontWeight: '700', color: colors.text, marginTop: 8 },
+  // Unit inside a big number: no fixed lineHeight, so it can't squeeze the number's line.
+  unit: { fontSize: 14 },
   delta: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6 },
   miniBars: { flexDirection: 'row', gap: 4, alignItems: 'flex-end', height: 26, marginTop: 10 },
   miniBar: { flex: 1, borderRadius: 3 },

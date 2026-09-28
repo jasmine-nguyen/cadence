@@ -29,19 +29,21 @@ export default function RootLayout() {
             screenOptions={{
               headerShown: false,
               contentStyle: { backgroundColor: colors.bg },
-              animation: 'slide_from_right',
+              // Every screen change cross-fades, matching the tab switches.
+              animation: 'fade',
             }}
           >
             <Stack.Screen name="index" />
             <Stack.Screen name="login" />
             <Stack.Screen name="onboarding" />
-            <Stack.Screen name="generating" options={{ animation: 'fade' }} />
-            <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
+            <Stack.Screen name="generating" />
+            <Stack.Screen name="(tabs)" />
             <Stack.Screen name="workout" />
             <Stack.Screen name="activity" />
-            <Stack.Screen name="feedback" options={{ presentation: 'transparentModal', animation: 'fade' }} />
-            <Stack.Screen name="checkin" options={{ presentation: 'modal' }} />
-            <Stack.Screen name="plan-complete" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="feedback" options={{ presentation: 'transparentModal' }} />
+            {/* iOS page sheets always slide up and ignore `animation`; full-screen modals honour the fade. */}
+            <Stack.Screen name="checkin" options={{ presentation: 'fullScreenModal' }} />
+            <Stack.Screen name="plan-complete" options={{ presentation: 'fullScreenModal' }} />
           </Stack>
         </ThemeProvider>
       </StoreProvider>
