@@ -15,6 +15,8 @@ interface TodayHeaderProps {
   weekLabel: string;
   /** Tapping the bell surfaces the coach check-in. */
   onBell?: () => void;
+  /** Week ring fill, 0–1. Defaults to the designed mock values. */
+  progress?: number;
 }
 
 const dotColor: Record<NonNullable<WeekDay['dot']>, string> = {
@@ -24,7 +26,7 @@ const dotColor: Record<NonNullable<WeekDay['dot']>, string> = {
 };
 
 /** Elevated header: profile/bell, week ring + label, calendar icon, week strip. */
-export function TodayHeader({ variant, week, weekLabel, onBell }: TodayHeaderProps) {
+export function TodayHeader({ variant, week, weekLabel, onBell, progress }: TodayHeaderProps) {
   const insets = useSafeAreaInsets();
   const paused = variant === 'paused';
   const completed = variant === 'completed';
@@ -53,7 +55,7 @@ export function TodayHeader({ variant, week, weekLabel, onBell }: TodayHeaderPro
             <ProgressRing
               size={28}
               strokeWidth={4}
-              progress={completed ? 0.5 : 0.3}
+              progress={progress ?? (completed ? 0.5 : 0.3)}
               color={completed ? colors.accentGreen : colors.accentCyan}
               trackColor={colors.stroke}
             />

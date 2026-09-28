@@ -20,8 +20,8 @@ export interface AuthState {
   error: string | null;
 }
 
-/** The five designed Today variants. */
-export type TodayState = 'planned' | 'paused' | 'completed' | 'empty' | 'error';
+/** The designed Today variants. `finished` = the plan's final session is done. */
+export type TodayState = 'planned' | 'paused' | 'completed' | 'empty' | 'error' | 'finished';
 
 export interface WeekDay {
   weekday: string;
@@ -42,7 +42,10 @@ export interface PlanProgress {
 export interface PlanState {
   currentWeek: number;
   totalWeeks: number;
-  status: 'active' | 'paused' | 'none';
+  status: 'active' | 'paused' | 'finished' | 'none';
+  /** The goal this plan was built for. Owned by the plan, not the onboarding
+   *  answers, which "What's next?" rewrites for the next plan. */
+  goalType: GoalType;
   pausedAt: string | null;
   progress: PlanProgress;
   week: WeekDay[];
@@ -90,6 +93,8 @@ export interface PlanDay {
   title: string;
   meta: string;
   status: SessionStatus;
+  /** Planned/actual distance. Preferred over parsing `meta` when present. */
+  distanceKm?: number;
 }
 
 export interface PlanWeek {
@@ -100,6 +105,26 @@ export interface PlanWeek {
   /** day-pip states for the multi-week overview */
   pips: ('done' | 'today' | 'goal' | 'upcoming' | 'rest')[];
   days: PlanDay[];
+}
+
+/** One end of the journey (first or final session) on the Plan · Finished screen. */
+export interface JourneyPoint {
+  weekLabel: string;
+  dateLabel: string;
+  title: string;
+  distanceKm: number;
+}
+
+/** Everything the Plan · Finished screen shows, derived from the plan weeks. */
+export interface JourneySummary {
+  goalType: GoalType;
+  goalTitle: string;
+  weeksCompleted: number;
+  weeksTotal: number;
+  sessionsCompleted: number;
+  totalKm: number;
+  first: JourneyPoint | null;
+  last: JourneyPoint | null;
 }
 
 // --- Activities --------------------------------------------------------------

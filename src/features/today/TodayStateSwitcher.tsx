@@ -6,10 +6,10 @@ import { useStore } from '@/state/store';
 import { TodayState } from '@/state/types';
 import { colors, radius as radii } from '@/theme';
 
-const ORDER: TodayState[] = ['planned', 'paused', 'completed', 'empty', 'error'];
+const ORDER: TodayState[] = ['planned', 'paused', 'completed', 'empty', 'error', 'finished'];
 
 /**
- * Dev-only control to preview all five Today states on device. Rendered behind
+ * Dev-only control to preview all Today states on device. Rendered behind
  * `__DEV__` from the Today screen; not part of the shipped UI.
  */
 export function TodayStateSwitcher() {
