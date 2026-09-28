@@ -20,18 +20,17 @@ export default function Login() {
 
   const onContinue = () => {
     // No backend yet, so any password passes; only an empty email shows the
-    // inline invalid-credentials error. Else 2FA.
+    // inline invalid-credentials error.
     if (!email.trim()) {
       setError('Incorrect email or password. Try again.');
       return;
     }
     setError(null);
     setLoading(true);
-    setAuth((a) => ({ ...a, email, needs2fa: true }));
-    setTimeout(() => {
-      setLoading(false);
-      router.push('/login/verify');
-    }, 500);
+    // Nothing can send a 2FA code yet, so go straight in. Once auth lands, set
+    // needs2fa and push '/login/verify' here instead.
+    setAuth((a) => ({ ...a, email }));
+    setTimeout(() => router.replace('/(tabs)'), 500);
   };
 
   return (

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Pressable, StyleSheet } from 'react-native';
+import { View, KeyboardAvoidingView, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Screen, Text, Button, BackButton, CodeInput } from '@/components';
 import { Lock } from '@/components/icons';
 import { useStore } from '@/state/store';
@@ -12,7 +11,6 @@ const CODE_LENGTH = 6;
 /** Login · 2-step verification. */
 export default function Verify() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { auth } = useStore();
 
   const [code, setCode] = useState('');
@@ -35,53 +33,57 @@ export default function Verify() {
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <BackButton />
-      </View>
-
-      <View style={styles.body}>
-        <View style={styles.lockTile}>
-          <Lock size={28} color={colors.accentCyan} strokeWidth={1.9} />
-        </View>
-        <Text variant="h1" center style={styles.title}>
-          Verify it's you
-        </Text>
-        <Text variant="body" color="textSecondary" center>
-          We sent a 6-digit code to
-        </Text>
-        <Text variant="body" weight="600" center>
-          {email}
-        </Text>
-
-        <View style={styles.codeWrap}>
-          <CodeInput length={CODE_LENGTH} value={code} onChange={setCode} />
+      {/* Lifts the Verify button above the number pad instead of under it. */}
+      <KeyboardAvoidingView style={styles.fill} behavior="padding">
+        <View style={styles.header}>
+          <BackButton />
         </View>
 
-        <Text variant="bodySmall" color="textMuted" center style={styles.resend}>
-          Resend code in{' '}
-          {countdown > 0 ? (
-            <Text variant="bodySmall" color="textSecondary">
-              {mmss}
-            </Text>
-          ) : (
-            <Text variant="bodySmall" weight="600" color="accentCyan">
-              Resend now
-            </Text>
-          )}
-        </Text>
-      </View>
+        <View style={styles.body}>
+          <View style={styles.lockTile}>
+            <Lock size={28} color={colors.accentCyan} strokeWidth={1.9} />
+          </View>
+          <Text variant="h1" center style={styles.title}>
+            Verify it's you
+          </Text>
+          <Text variant="body" color="textSecondary" center>
+            We sent a 6-digit code to
+          </Text>
+          <Text variant="body" weight="600" center>
+            {email}
+          </Text>
 
-      <View style={[styles.footer, { paddingBottom: insets.bottom + 12 }]}>
-        {/* No backend to send a code yet, so Verify works with any (or no) code. */}
-        <Button label="Verify" onPress={onVerify} loading={verifying} />
-      </View>
+          <View style={styles.codeWrap}>
+            <CodeInput length={CODE_LENGTH} value={code} onChange={setCode} />
+          </View>
+
+          <Text variant="bodySmall" color="textMuted" center style={styles.resend}>
+            Resend code in{' '}
+            {countdown > 0 ? (
+              <Text variant="bodySmall" color="textSecondary">
+                {mmss}
+              </Text>
+            ) : (
+              <Text variant="bodySmall" weight="600" color="accentCyan">
+                Resend now
+              </Text>
+            )}
+          </Text>
+        </View>
+
+        <View style={styles.footer}>
+          {/* No backend to send a code yet, so Verify works with any (or no) code. */}
+          <Button label="Verify" onPress={onVerify} loading={verifying} />
+        </View>
+      </KeyboardAvoidingView>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
+  fill: { flex: 1 },
   header: { paddingHorizontal: 26, paddingTop: 14 },
-  body: { paddingHorizontal: 32, paddingTop: 44, alignItems: 'center' },
+  body: { flex: 1, paddingHorizontal: 32, paddingTop: 44, alignItems: 'center' },
   lockTile: {
     width: 60,
     height: 60,
@@ -95,10 +97,8 @@ const styles = StyleSheet.create({
   codeWrap: { marginTop: 36 },
   resend: { marginTop: 26 },
   footer: {
-    position: 'absolute',
-    left: 32,
-    right: 32,
-    bottom: 0,
+    paddingHorizontal: 32,
     paddingTop: spacing.md,
+    paddingBottom: 12,
   },
 });
