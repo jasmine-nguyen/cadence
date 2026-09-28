@@ -72,12 +72,8 @@ export default function Verify() {
       </View>
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + 12 }]}>
-        <Button
-          label="Verify"
-          onPress={onVerify}
-          disabled={code.length < CODE_LENGTH}
-          loading={verifying}
-        />
+        {/* No backend to send a code yet, so Verify works with any (or no) code. */}
+        <Button label="Verify" onPress={onVerify} loading={verifying} />
       </View>
     </Screen>
   );
