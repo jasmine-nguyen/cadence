@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Pressable, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Text, Button } from '@/components';
-import { Lightbulb, AlignLeft, ChevronRight, Check, Clock } from '@/components/icons';
+import { Lightbulb, AlignLeft, ChevronRight, Check, Clock, Trophy } from '@/components/icons';
 import { Workout } from '@/state/types';
 import { seedResult } from '@/state/data';
 import { colors, radius as radii, alpha } from '@/theme';
@@ -63,8 +63,16 @@ export function PlannedWorkoutCard({
   );
 }
 
+type WorkoutResult = { distance: string; time: string; pace: string };
+
 /** Today · Completed — green rail, completed chip, result stats. */
-export function CompletedWorkoutCard({ workout }: { workout: Workout }) {
+export function CompletedWorkoutCard({
+  workout,
+  result = seedResult,
+}: {
+  workout: Workout;
+  result?: WorkoutResult;
+}) {
   return (
     <View style={styles.cardRow}>
       <AccentRail solid />
@@ -82,9 +90,9 @@ export function CompletedWorkoutCard({ workout }: { workout: Workout }) {
           {workout.dateLabel}
         </Text>
         <View style={styles.stats}>
-          <Stat label="Distance" value={seedResult.distance} />
-          <Stat label="Time" value={seedResult.time} />
-          <Stat label="Avg pace" value={seedResult.pace} />
+          <Stat label="Distance" value={result.distance} />
+          <Stat label="Time" value={result.time} />
+          <Stat label="Avg pace" value={result.pace} />
         </View>
       </View>
     </View>
@@ -147,6 +155,29 @@ export function NiceWorkCard({ onFeedback }: { onFeedback?: () => void }) {
         />
         <Button label="Summary" variant="secondary" full={false} style={styles.summaryBtn} />
       </View>
+    </View>
+  );
+}
+
+/**
+ * Today · Finished — replaces "Nice work" once the plan's final session is
+ * done. Gold marks the achievement; the action stays cyan.
+ */
+export function PlanCompleteCard({ copy, onOpen }: { copy: string; onOpen?: () => void }) {
+  return (
+    <View style={styles.niceCard}>
+      <View style={styles.goalHeader}>
+        <View style={styles.trophyTile}>
+          <Trophy size={20} color={colors.gold} strokeWidth={1.9} />
+        </View>
+        <Text variant="overline" color="gold" style={styles.whyLabel}>
+          Goal reached
+        </Text>
+      </View>
+      <Text variant="bodySmall" style={styles.niceCopy}>
+        {copy}
+      </Text>
+      <Button label="See your journey" onPress={onOpen} style={styles.journeyBtn} />
     </View>
   );
 }
@@ -226,5 +257,15 @@ const styles = StyleSheet.create({
   niceActions: { flexDirection: 'row', gap: 10 },
   feelBtn: { flex: 1, paddingVertical: 13, borderRadius: 12 },
   summaryBtn: { paddingVertical: 13, paddingHorizontal: 16, borderRadius: 12 },
+  goalHeader: { flexDirection: 'row', alignItems: 'center', gap: 11, marginBottom: 10 },
+  trophyTile: {
+    width: 34,
+    height: 34,
+    borderRadius: 9,
+    backgroundColor: alpha.goldTile,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  journeyBtn: { paddingVertical: 13, borderRadius: 12 },
   pressed: { opacity: 0.85 },
 });

@@ -86,7 +86,8 @@ function PulseItem({ label }: { label: string }) {
 /** Onboarding · Generating — loading state that auto-advances to Today. */
 export default function Generating() {
   const router = useRouter();
-  const { setOnboarding } = useStore();
+  const { onboarding, setOnboarding, activateNewPlan } = useStore();
+  const goal = onboarding.goal.type ?? '5k';
   // number of completed steps; the next one is "active".
   const [done, setDone] = useState(2);
 
@@ -97,11 +98,16 @@ export default function Generating() {
     timers.push(
       setTimeout(() => {
         setOnboarding((prev) => ({ ...prev, generating: false }));
-        router.replace('/(tabs)');
+        // A next plan (after Plan · Finished) must land on Today · Planned.
+        activateNewPlan(goal);
+        // First run: (tabs) isn't in the stack yet, so this replaces Generating.
+        // Next plan: pops back to the existing (tabs), clearing the
+        // Plan · Finished modal and onboarding that were pushed on top of it.
+        router.dismissTo('/(tabs)');
       }, 3800),
     );
     return () => timers.forEach(clearTimeout);
-  }, [router, setOnboarding]);
+  }, [router, setOnboarding, activateNewPlan, goal]);
 
   return (
     <Screen>

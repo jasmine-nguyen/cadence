@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,6 +10,7 @@ import {
   CompletedWorkoutCard,
   ErrorWorkoutCard,
   NiceWorkCard,
+  PlanCompleteCard,
 } from '@/features/today/WorkoutCards';
 import {
   WeekOverviewCard,
@@ -21,7 +22,8 @@ import {
 import { TodayStateSwitcher } from '@/features/today/TodayStateSwitcher';
 import { WatchGuidance } from '@/features/workout/WatchGuidance';
 import { useStore } from '@/state/store';
-import { seedWorkout } from '@/state/data';
+import { seedWorkout, seedGoalWorkout, seedGoalResult, seedFinalWeek } from '@/state/data';
+import { goalHeadline } from '@/state/journey';
 import { colors, radius as radii, screenPadding } from '@/theme';
 
 /** Section header "Today's workout" + weather. */
@@ -53,11 +55,19 @@ function SimpleHeader({ topInset }: { topInset: number }) {
   );
 }
 
-/** Today — the daily home. Renders all five designed states. */
+/** Today — the daily home. Renders every designed state. */
 export default function Today() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { plan, todayState, resumePlan, retrySync } = useStore();
+  const { plan, todayState, resumePlan, retrySync, journey, celebrationSeen, markCelebrationSeen } =
+    useStore();
+
+  // Present Plan · Finished once when the plan is done; the card below reopens it.
+  useEffect(() => {
+    if (todayState !== 'finished' || celebrationSeen) return;
+    markCelebrationSeen();
+    router.push('/plan-complete');
+  }, [todayState, celebrationSeen, markCelebrationSeen, router]);
 
   const bodyPad = { paddingBottom: 130 + insets.bottom };
   const openWorkout = () => router.push('/workout');
@@ -114,6 +124,29 @@ export default function Today() {
       );
       break;
     }
+
+    case 'finished':
+      content = (
+        <>
+          <TodayHeader
+            variant="completed"
+            week={seedFinalWeek}
+            weekLabel={`Week ${journey.weeksTotal}/${journey.weeksTotal}`}
+            progress={1}
+          />
+          <ScreenScroll contentContainerStyle={[styles.body, bodyPad]}>
+            <View style={styles.sectionOnly}>
+              <Text variant="h2">Today's workout</Text>
+            </View>
+            <CompletedWorkoutCard workout={seedGoalWorkout} result={seedGoalResult} />
+            <PlanCompleteCard
+              copy={`${goalHeadline(journey)} That's the whole plan — ${journey.sessionsCompleted} sessions done.`}
+              onOpen={() => router.push('/plan-complete')}
+            />
+          </ScreenScroll>
+        </>
+      );
+      break;
 
     case 'empty':
       content = (

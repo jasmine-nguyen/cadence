@@ -8,8 +8,19 @@ import {
   SettingsState,
   InsightsData,
   Activity,
+  GoalType,
+  JourneySummary,
 } from './types';
-import { seedPlan, seedSettings, seedInsights, seedActivities } from './data';
+import {
+  seedPlan,
+  seedSettings,
+  seedInsights,
+  seedActivities,
+  seedFinishedWeeks,
+  seedFinalWeek,
+  planGoalTitle,
+} from './data';
+import { buildJourneySummary } from './journey';
 
 const initialOnboarding: OnboardingState = {
   step: 1,
@@ -32,11 +43,15 @@ interface Store {
   onboarding: OnboardingState;
   auth: AuthState;
   plan: PlanState;
-  /** Which of the five designed Today variants to render. */
+  /** Which of the designed Today variants to render. */
   todayState: TodayState;
   settings: SettingsState;
   insights: InsightsData;
   activities: Activity[];
+  /** Summary of the finished plan (Plan · Finished), derived from the plan weeks. */
+  journey: JourneySummary;
+  /** Plan · Finished has been auto-presented once for this plan. */
+  celebrationSeen: boolean;
 
   setOnboarding: React.Dispatch<React.SetStateAction<OnboardingState>>;
   toggleInjury: (injury: Injury) => void;
@@ -47,6 +62,13 @@ interface Store {
   pausePlan: () => void;
   resumePlan: () => void;
   retrySync: () => void;
+  /** The plan's final session is done → Today · Finished. */
+  finishPlan: () => void;
+  markCelebrationSeen: () => void;
+  /** "What's next?" — pre-fill onboarding step 3 with the chosen goal. */
+  beginNextPlan: (goal: GoalType) => void;
+  /** A newly generated plan becomes the active one (seeded until CAD-48). */
+  activateNewPlan: (goal: GoalType) => void;
 
   setSettings: React.Dispatch<React.SetStateAction<SettingsState>>;
   setInsightsReady: (ready: boolean) => void;
@@ -62,6 +84,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState(seedSettings);
   const [insights, setInsights] = useState(seedInsights);
   const [activities] = useState(seedActivities);
+  // Seeded until CAD-48 generates real plans.
+  const [finishedWeeks] = useState(seedFinishedWeeks);
+  const [celebrationSeen, setCelebrationSeen] = useState(false);
+
+  // From the plan, not onboarding.goal: picking the next goal must not
+  // rewrite the summary of the plan just finished.
+  const journey = useMemo(
+    () => buildJourneySummary(finishedWeeks, plan.goalType, planGoalTitle),
+    [finishedWeeks, plan.goalType],
+  );
 
   const setInsightsReady = useCallback(
     (ready: boolean) => setInsights((i) => ({ ...i, ready })),
@@ -95,6 +127,34 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const retrySync = useCallback(() => setTodayState('planned'), []);
 
+  const finishPlan = useCallback(() => {
+    setPlan((p) => ({
+      ...p,
+      status: 'finished',
+      pausedAt: null,
+      currentWeek: p.totalWeeks,
+      week: seedFinalWeek,
+    }));
+    setTodayState('finished');
+  }, []);
+
+  const markCelebrationSeen = useCallback(() => setCelebrationSeen(true), []);
+
+  const beginNextPlan = useCallback((goal: GoalType) => {
+    setOnboarding((prev) => ({
+      ...prev,
+      step: 3,
+      // Keep profile, background and days/week; the old target date has passed.
+      goal: { ...prev.goal, type: goal, targetDate: undefined },
+    }));
+  }, []);
+
+  const activateNewPlan = useCallback((goal: GoalType) => {
+    setPlan({ ...seedPlan, goalType: goal });
+    setTodayState('planned');
+    setCelebrationSeen(false);
+  }, []);
+
   const value = useMemo<Store>(
     () => ({
       onboarding,
@@ -104,6 +164,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       settings,
       insights,
       activities,
+      journey,
+      celebrationSeen,
       setOnboarding,
       toggleInjury,
       setAuth,
@@ -111,6 +173,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       pausePlan,
       resumePlan,
       retrySync,
+      finishPlan,
+      markCelebrationSeen,
+      beginNextPlan,
+      activateNewPlan,
       setSettings,
       setInsightsReady,
     }),
@@ -122,10 +188,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       settings,
       insights,
       activities,
+      journey,
+      celebrationSeen,
       toggleInjury,
       pausePlan,
       resumePlan,
       retrySync,
+      finishPlan,
+      markCelebrationSeen,
+      beginNextPlan,
+      activateNewPlan,
       setInsightsReady,
     ],
   );

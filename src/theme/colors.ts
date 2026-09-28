@@ -36,6 +36,7 @@ export const alpha = {
   greenFill: 'rgba(158,206,106,0.15)',
   goldBanner: 'rgba(224,175,104,0.12)',
   goldBorder: 'rgba(224,175,104,0.35)',
+  goldTile: 'rgba(224,175,104,0.15)',
   redBanner: 'rgba(247,118,142,0.1)',
   redBorder: 'rgba(247,118,142,0.35)',
   redTile: 'rgba(247,118,142,0.15)',

@@ -7,6 +7,7 @@ import {
   InsightsData,
   SettingsState,
 } from './types';
+import { dayDistanceKm, formatKm } from './journey';
 
 /** Seed week strip (Mon 13 – Sun 19 Jul), Wed 15 = today. */
 export const seedWeek: WeekDay[] = [
@@ -23,6 +24,7 @@ export const seedPlan: PlanState = {
   currentWeek: 1,
   totalWeeks: 4,
   status: 'active',
+  goalType: '5k',
   pausedAt: null,
   progress: {
     workoutsDone: 1,
@@ -144,6 +146,62 @@ export const seedWeeks: PlanWeek[] = [
     ],
   },
 ];
+
+// --- Finished plan (Today · Finished, Plan · Finished) -----------------------
+
+/** Distance of the Week 4 goal session — its seeded `meta` has no number. */
+const GOAL_SESSION_KM = 5;
+
+/**
+ * `seedWeeks` with every session done — the state after the final session.
+ * Derived from `seedWeeks` so the two can't drift apart.
+ */
+export const seedFinishedWeeks: PlanWeek[] = seedWeeks.map((week) => ({
+  ...week,
+  chip: week.chip === 'goal' ? 'goal' : undefined,
+  pips: week.pips.map((p) => (p === 'rest' ? 'rest' : 'done')),
+  days: week.days.map((day) => {
+    if (day.type === 'rest') return day;
+    const isGoal = day.meta === 'goal session';
+    const distanceKm = isGoal ? GOAL_SESSION_KM : dayDistanceKm(day);
+    return {
+      ...day,
+      status: 'done',
+      distanceKm,
+      meta: `${formatKm(distanceKm)} km · ${isGoal ? 'goal reached' : 'done'}`,
+    };
+  }),
+}));
+
+/** Final week strip (Mon 3 – Sun 9 Aug), Sun 9 = today, goal session done. */
+export const seedFinalWeek: WeekDay[] = [
+  { weekday: 'MON', date: 3, dot: 'done' },
+  { weekday: 'TUE', date: 4 },
+  { weekday: 'WED', date: 5, dot: 'done' },
+  { weekday: 'THU', date: 6 },
+  { weekday: 'FRI', date: 7, dot: 'done' },
+  { weekday: 'SAT', date: 8 },
+  { weekday: 'SUN', date: 9, dot: 'done', isToday: true },
+];
+
+/** The goal session as shown on Today · Finished. */
+export const seedGoalWorkout: Workout = {
+  ...seedWorkout,
+  id: 'goal',
+  title: 'Run 5K',
+  dateLabel: 'Sunday 9 Aug',
+  distanceLabel: '5km',
+  durationLabel: '~45 min',
+  why: 'Goal day. Start slower than feels right and keep it conversational — finishing is the win.',
+  blocks: [],
+};
+
+/** Goal-session result stats. */
+export const seedGoalResult = {
+  distance: '5.03 km',
+  time: '44:10',
+  pace: '8:47 /km',
+};
 
 /** Completed runs (Activity History). */
 export const seedActivities: Activity[] = [

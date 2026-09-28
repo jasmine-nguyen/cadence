@@ -41,6 +41,7 @@ export default function RootLayout() {
             <Stack.Screen name="activity" />
             <Stack.Screen name="feedback" options={{ presentation: 'transparentModal', animation: 'fade' }} />
             <Stack.Screen name="checkin" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="plan-complete" options={{ presentation: 'modal' }} />
           </Stack>
         </ThemeProvider>
       </StoreProvider>

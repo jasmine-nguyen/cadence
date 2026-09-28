@@ -3,7 +3,7 @@
 ## Overview
 Operation Cadence is a personal running-coach app (a Runna-style replacement) that generates AI walk/run training plans for a beginner returning to running, syncs them to a COROS watch, and adapts to the runner's data. Target platform: **React Native (Expo), iOS, iPhone only.**
 
-This bundle is the **complete app** — the four core-flow screens plus the six that complete it:
+This bundle is the **complete app** — the four core-flow screens plus the seven that complete it:
 
 **Core flow**
 1. **Onboarding & Goal Setup** (3 steps + generating)
@@ -18,8 +18,9 @@ This bundle is the **complete app** — the four core-flow screens plus the six 
 8. **Post-Workout Feedback** (prompt / saved)
 9. **Missed-session check-in** (prompt / adjusted)
 10. **Settings** (main / pause-plan sheet)
+11. **Plan finished** (Today·Finished / journey + what's next)
 
-**30 frames total** on one canvas (`Cadence Screens.dc.html`).
+**32 frames total** on one canvas (`Cadence Screens.dc.html`).
 
 ## Build Checklist (update as you go)
 Claude Code: tick a box (`[x]`) when a screen is implemented and matches its screenshot; commit this file with each change so progress is tracked in git. A screen is "done" only when every listed state is built. Add a PR link or commit SHA in the Notes column if useful.
@@ -38,6 +39,7 @@ Claude Code: tick a box (`[x]`) when a screen is implemented and matches its scr
 | 8 | Post-Workout Feedback | prompt · saved | [x] | PR #2 · from Today·Completed |
 | 9 | Missed-session check-in | prompt · adjusted | [x] | PR #2 · from Today bell |
 | 10 | Settings | main · pause sheet | [x] | PR #2 |
+| 11 | Plan finished | today·finished · finished | [x] | CAD-85 |
 
 ## About the Design Files
 `Cadence Screens.dc.html` is a **design reference authored in HTML** — a prototype showing intended look, layout, copy, and behavior. It is **not production code to copy directly.** HTML/CSS is only the rendering medium.
@@ -184,6 +186,12 @@ Daily reminder, shoe threshold, pause, connections. Tab: **Settings**. Scrollabl
 - **Sign out** (red text).
 - **Pause-plan sheet.** Backdrop dim+blur. Gold pause tile, H2 "Pause your plan?", copy ("We'll hold your schedule and stop reminders. Resume any time — the remaining weeks shift forward…"). **"FOR HOW LONG?"** segmented chips (1 week / **2 weeks** selected gold / Until I resume). **Pause plan** gold CTA + "Never mind". Confirm → app enters the paused state seen on Today·Paused and Plan·Paused.
 
+### 11 · Plan finished
+Shown once the plan's **final session** is completed. Every number is derived from the plan weeks (`buildJourneySummary` in `src/state/journey.ts`), never literals.
+- **Today · Finished.** Header as Today·Completed but ring full and "Week 4/4"; final week strip with Sunday (goal day) as the green today disc. Completed card for the goal session ("Run 5K · Sunday 9 Aug", distance/time/pace). **GOAL REACHED** card replaces "Nice work": gold trophy tile (`alpha.goldTile`) + gold overline, one line of goal-specific copy, **See your journey** cyan CTA.
+- **Plan · Finished** (full-screen modal, like Check-in). Close ✕ top-right. 72px **gold-tinted trophy disc**, H1 "You did it", lead "{N} weeks ago you started with a {km} km {first session}. {goal headline}". The headline branches on goal type — "Today you ran 5K without stopping." (5K), "Today you ran 10K." (10K), "{N} weeks of showing up." (habit). **Journey card** (Check-in before/after style): muted "then" row (Week 1 · first session · distance) → "now" row with gold trophy tile (final week · goal session) + gold "goal". **Three stat tiles**: Weeks 4/4 · Sessions · Distance km. **WHAT'S NEXT?** overline + single-select rows of every goal except the one just finished (first pre-selected). **Set up my next plan** cyan CTA + "Not now".
+- Gold marks the achievement only (disc, "now" row, overline); the CTA stays cyan.
+
 ## Interactions & Behavior
 - **Onboarding:** Continue advances 1→2→3; back returns. Tap-to-select (single for ability/goal/frequency, multi for injuries). "Build my plan" → Generating → auto-advances to Today.
 - **Login:** Continue validates → Today (trusted) or 2FA. Social = native Apple/Google. 2FA auto-advances focus; Verify enabled at 6 digits; resend disabled until countdown 0.
@@ -194,12 +202,13 @@ Daily reminder, shoe threshold, pause, connections. Tab: **Settings**. Scrollabl
 - **Activities:** tap a row → Detail. Filter icon opens type/date filters (not drawn — use the repo's filter pattern).
 - **Feedback:** Easy/Just right/Hard single-select; optional note; Save → Saved confirmation → Back to today. Skip dismisses with no rating.
 - **Check-in:** triggered by ≥2–3 consecutive missed sessions. Reason single-select; "Adjust my plan" runs the AI re-plan → Adjusted summary → Plan. "Keep it as is" / ✕ dismisses without change.
+- **Plan finished:** Today·Finished auto-presents Plan·Finished once; "See your journey" reopens it. "Set up my next plan" → Onboarding step 3 with the chosen goal selected and profile / background / days-per-week kept (target date cleared). Back from step 3 returns to Plan·Finished. "Build my plan" → Generating → Today·Planned (modal cleared). ✕ / "Not now" dismisses to Today·Finished.
 - **Settings:** toggles persist immediately; reminder time + units + shoe threshold open pickers/steppers; Pause plan → sheet → paused state; Sign out confirms then returns to Login.
 
 ## States (all designed & included)
 - **Onboarding:** step 1/2/3 defaults; **loading** (Generating). Validation soft (all optional).
 - **Login:** default; **error** (invalid creds, inline red); **2FA**.
-- **Today:** **planned · paused · completed · empty · error.**
+- **Today:** **planned · paused · completed · empty · error · finished.**
 - **Workout Detail:** default · **skip sheet**. (~~in-progress~~ removed — CAD-92.)
 - **Plan:** **week view · multi-week · reschedule (dragging) · paused.**
 - **Insights:** **dashboard (populated) · building (early/locked).**
@@ -207,12 +216,13 @@ Daily reminder, shoe threshold, pause, connections. Tab: **Settings**. Scrollabl
 - **Feedback:** **prompt · saved.**
 - **Check-in:** **prompt · adjusted.**
 - **Settings:** **main · pause-plan sheet.**
+- **Plan finished:** **Today·Finished · Plan·Finished.**
 - Standard button-spinner (Continue/Save/Adjust) follows the repo's loading-button pattern; network errors follow the Today·Error banner pattern.
 
 ## State Management (suggested shape)
 - `onboarding`: `{ step, profile{age,weight,height,sex}, background{ability,frequency,longestRun,injuries[]}, goal{type,targetDate,daysPerWeek}, generating }`
 - `auth`: `{ email, session, needs2fa, code[6], resendCountdown, error }`
-- `plan`: `{ weeks[], currentWeek, status:'active'|'paused', pausedAt, pauseDuration, progress{workoutsDone,workoutsTotal,distanceDone,distanceTotal,streak} }` — `weeks[].days[]` = `{ date, type:'run'|'walk'|'long'|'rest', title, distance, duration, status:'done'|'today'|'upcoming'|'skipped'|'onhold' }`
+- `plan`: `{ weeks[], currentWeek, status:'active'|'paused'|'finished', pausedAt, pauseDuration, progress{workoutsDone,workoutsTotal,distanceDone,distanceTotal,streak} }` — `weeks[].days[]` = `{ date, type:'run'|'walk'|'long'|'rest', title, distance, duration, status:'done'|'today'|'upcoming'|'skipped'|'onhold' }`
 - `today`: derived → today's `workout` + `briefing(why)` + `weather`
 - `workoutDetail`: `{ steps[], skipSheetOpen, skipReason }`, ~~`liveSession`~~ (removed — CAD-92; no in-app live session)
 - `activities`: `[{ id, date, type, distance, movingTime, avgPace, avgHr, felt, splits[] }]`
@@ -228,7 +238,7 @@ Daily reminder, shoe threshold, pause, connections. Tab: **Settings**. Scrollabl
 - **No external image or photo assets** are required. Activity Detail leaves room for the repo's map component but the mock draws none.
 
 ## Files
-- `Cadence Screens.dc.html` — **all 30 frames** on one canvas. **Authoritative visual reference.** Each frame is a `.phone` element (390×844) tagged with `data-screen-label`. Order: Onboarding Step 1–3, Generating, Login, Login·2FA, Login·Error, Today·Planned/Paused/Completed/Empty/Error, Workout Detail / ·Skip / ·In-progress, Plan·Week/Multi-week/Reschedule/Paused, Insights·Dashboard/Building, Activities·List/Detail/Empty, Feedback·Prompt/Saved, Check-in·Prompt/Adjusted, Settings / ·Pause plan.
+- `Cadence Screens.dc.html` — **all 32 frames** on one canvas. **Authoritative visual reference.** Each frame is a `.phone` element (390×844) tagged with `data-screen-label`. Order: Onboarding Step 1–3, Generating, Login, Login·2FA, Login·Error, Today·Planned/Paused/Completed/Empty/Error, Workout Detail / ·Skip / ·In-progress, Plan·Week/Multi-week/Reschedule/Paused, Insights·Dashboard/Building, Activities·List/Detail/Empty, Feedback·Prompt/Saved, Check-in·Prompt/Adjusted, Settings / ·Pause plan, Today·Finished, Plan·Finished.
 - `support.js` — runtime for the HTML prototype only; **not needed** for the RN implementation.
 - `screenshots/` — rendered PNG targets:
   - `01-onboarding-steps-1-2.png`
@@ -244,6 +254,7 @@ Daily reminder, shoe threshold, pause, connections. Tab: **Settings**. Scrollabl
   - `11-post-workout-feedback.png`
   - `12-missed-session-checkin.png`
   - `13-settings-pause.png`
+  - `14-plan-finished.png` (true PNG, full frames; rendered from static markup because `support.js` needs unpkg)
 
 ## Implementation Notes
 - Build as **React Native (Expo), iPhone only** — no web/tablet layouts.
