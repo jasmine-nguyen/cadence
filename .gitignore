@@ -30,3 +30,6 @@ yarn-error.*
 
 # Env
 .env*.local
+
+# Python virtual environment (the cloud session hook creates it; older Pythons do not hide it themselves)
+.venv/
