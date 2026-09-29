@@ -63,6 +63,14 @@ backend/plans/
 backend/build/
 backend/package/
 
+# CAD-83 spike build output, bundled binary and local credentials file
+spikes/**/package/
+spikes/**/build/
+spikes/**/bin/
+spikes/**/wheels/
+creds.json
+out.json
+
 # Terraform (.terraform.lock.hcl IS committed)
 .terraform/
 *.tfstate
