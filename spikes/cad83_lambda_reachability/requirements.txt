@@ -1,0 +1,10 @@
+# CAD-83 spike: the only third-party modules coros_mcp/coros_api.py and
+# coros_mcp/auth/* import. build.sh installs these as linux/arm64 wheels.
+# coros-mcp itself is installed separately with --no-deps (see build.sh), because
+# its full dependency tree (fastmcp and friends) isn't needed and has sdist-only
+# packages. If the Lambda reports an ImportError, add the missing module here.
+httpx
+cryptography
+keyring
+pydantic>=2
+tzdata
