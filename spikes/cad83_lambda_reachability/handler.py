@@ -87,30 +87,31 @@ def _check_coros(creds):
     }
 
 
-def _check_speediance(creds):
-    token_cache = os.environ.get("SPEEDIANCE_TOKEN_CACHE", DEFAULT_TOKEN_CACHE)
-    Path(token_cache).parent.mkdir(parents=True, exist_ok=True)
-    env = {
-        **os.environ,
-        "SPEEDIANCE_TOKEN_CACHE": token_cache,
-        "SPEEDIANCE_EMAIL": creds["SPEEDIANCE_EMAIL"],
-        "SPEEDIANCE_PASSWORD": creds["SPEEDIANCE_PASSWORD"],
-    }
-    args = [
-        os.environ.get("SPEEDIANCE_BIN", "/var/task/speediance-cli"),
-        *shlex.split(os.environ.get("SPEEDIANCE_ARGS") or "login"),
-    ]
-
+def _check_speediance(creds, secrets):
     started = time.monotonic()
     try:
+        token_cache = os.environ.get("SPEEDIANCE_TOKEN_CACHE", DEFAULT_TOKEN_CACHE)
+        Path(token_cache).parent.mkdir(parents=True, exist_ok=True)
+        env = {
+            **os.environ,
+            "SPEEDIANCE_TOKEN_CACHE": token_cache,
+            "SPEEDIANCE_EMAIL": creds["SPEEDIANCE_EMAIL"],
+            "SPEEDIANCE_PASSWORD": creds["SPEEDIANCE_PASSWORD"],
+        }
+        args = [
+            os.environ.get("SPEEDIANCE_BIN", "/var/task/speediance-cli"),
+            *shlex.split(os.environ.get("SPEEDIANCE_ARGS") or "login"),
+        ]
         completed = subprocess.run(args, env=env, capture_output=True, text=True, timeout=90)
-    except (OSError, subprocess.TimeoutExpired) as error:
+    except Exception as error:
         return {"ok": False, "duration_ms": _elapsed_ms(started), **_error_fields(error)}
 
+    # Scrub before cutting, or a secret straddling the cut would slip through.
+    stderr = _scrub(completed.stderr or "", secrets)
     return {
         "ok": completed.returncode == 0,
         "returncode": completed.returncode,
-        "stderr_tail": (completed.stderr or "")[-STDERR_TAIL_CHARS:],
+        "stderr_tail": stderr[-STDERR_TAIL_CHARS:],
         "duration_ms": _elapsed_ms(started),
     }
 
@@ -137,7 +138,7 @@ def handler(event, context):
     if only in (None, "coros"):
         result["coros"] = _check_coros(creds)
     if only in (None, "speediance"):
-        result["speediance"] = _check_speediance(creds)
+        result["speediance"] = _check_speediance(creds, secrets)
 
     result = _scrub(result, secrets)
     print(json.dumps(result))
