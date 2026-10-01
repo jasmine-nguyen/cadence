@@ -239,6 +239,37 @@ def test_write_reports_a_cleanup_failure_and_scrubs_it(spike, monkeypatch, capsy
     assert "***" in write["cleanup_error"]
 
 
+def test_write_error_text_reaches_the_response_but_never_the_log(spike, monkeypatch, capsys):  # noqa: F811
+    # Error text can echo the COROS server's reply (calendar text), so the log keeps
+    # only the error types; the full text goes back to the invoker alone.
+    _freeze(spike, monkeypatch)
+    coros = _FakeCorosCalendar()
+    _install(monkeypatch, coros)
+    leak = "server said: 'Sunday Long Run 18k' clashes"
+
+    async def broken_add(*args, **kwargs):
+        raise RuntimeError(f"add rejected, {leak}")
+
+    async def broken_remove(auth, plan_id, id_in_plan, plan_program_id):
+        raise RuntimeError(f"remove rejected, {leak}")
+
+    monkeypatch.setattr(_api(), "schedule_workout", broken_add)
+    monkeypatch.setattr(_api(), "remove_scheduled_workout", broken_remove)
+    _entry(coros, MELB_TEST_DAY, TEST_NAME)  # a leftover forces a remove call
+
+    write = spike.handler({"mode": "write"}, None)["coros"]
+    lines = _log_lines(capsys)
+
+    assert leak in write["error"]
+    assert leak in write["cleanup_error"]
+    assert leak not in "\n".join(lines)
+    logged_write = json.loads(lines[-1])["coros"]
+    assert logged_write["error_type"] == "RuntimeError"
+    assert logged_write["cleanup_error_type"] == "RuntimeError"
+    assert "error" not in logged_write
+    assert "cleanup_error" not in logged_write
+
+
 def test_write_reports_remove_not_returning_none(spike, monkeypatch):  # noqa: F811
     # [A8] (P1) remove_scheduled_workout returns None on success; anything else is flagged
     _freeze(spike, monkeypatch)

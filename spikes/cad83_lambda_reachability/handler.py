@@ -43,6 +43,7 @@ TEST_WORKOUT_STEPS = [{"name": "Easy run", "duration_minutes": 10, "intensity_lo
 COROS_RUN_SPORT_TYPE = 100  # coros-mcp rejects wire id 1 for runs
 COROS_HEART_RATE_TARGET = 2
 NIGHTLY_FIELDS = ("ok", "stage", "error_type", "duration_ms")
+WRITE_ERROR_TEXT = ("error", "cleanup_error")  # kept in the write response, never logged
 MODES = (None, "write", "contents", "nightly")
 
 
@@ -474,7 +475,10 @@ def handler(event, context):
     if mode is None:
         result = log_line = _reachability(event, creds, secrets)
     elif mode == "write":
-        result = log_line = {"mode": "write", "coros": _coros_write_test(creds)}
+        write = _coros_write_test(creds)
+        result = {"mode": "write", "coros": write}
+        # Error text can echo the COROS server's reply (calendar text): log the types only.
+        log_line = {"mode": "write", "coros": {k: v for k, v in write.items() if k not in WRITE_ERROR_TEXT}}
     elif mode == "contents":
         result, log_line = _contents(creds, secrets)
     else:
