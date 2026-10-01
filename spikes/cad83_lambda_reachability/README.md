@@ -148,6 +148,133 @@ Stop. Don't continue with Lambda-based cards. Raise it on the board with the
 results table, so the runtime decision can be revisited. The fallback is running
 the nightly job on the Pi.
 
+## CAD-94 follow-up: write, contents and 7 nightly runs (Sydney only)
+
+CAD-94 adds three modes to the same Lambda, picked with `{"mode": ...}` in the
+payload. With no `mode` it still runs the CAD-83 check above.
+
+| Mode | Run by | Does | Logs to CloudWatch |
+| --- | --- | --- | --- |
+| `write` | you, once | adds one COROS run `CADENCE TEST – delete me` 14 days ahead, reads back, removes every copy, reads back | counts only |
+| `contents` | you, once | next 7 days of COROS + last 7 days of Speediance, **in the response only** | ok / stage / error type / timing only |
+| `nightly` | the schedule, 7 nights | logs in to both and reads, no writes | ok / stage / error type / timing only |
+
+Speediance is only ever asked to `login` or list `workouts`. Nothing is pushed
+(there's no delete, and Speediance work is on hold pending ADR-007). The new modes
+ignore `SPEEDIANCE_ARGS`.
+
+### 1. Build and deploy Sydney with the schedule
+
+Build as in step 1 above, then pick the dates. The schedule fires at 22:00
+Melbourne time; the dates are in UTC. Set the start to before the first night and
+the end to about an hour after the 7th run. 22:00 Melbourne is 12:00Z before
+daylight saving starts (Sunday 4 October 2026) and 11:00Z after it.
+
+```sh
+cd spikes/cad83_lambda_reachability
+terraform workspace select ap-southeast-2 || terraform workspace new ap-southeast-2
+terraform apply -var region=ap-southeast-2 \
+  -var nightly_enabled=true \
+  -var nightly_start_date=2026-10-02T00:00:00Z \
+  -var nightly_end_date=2026-10-08T12:30:00Z   # 7 runs: 2–8 October
+```
+
+Then put the credentials in the secret (step 3 above) if this is a fresh deploy.
+The function never retries a failed run, so each night gives exactly one result.
+
+### 2. Write test (once, by hand)
+
+```sh
+aws lambda invoke --region ap-southeast-2 \
+  --function-name "$(terraform output -raw function_name)" \
+  --cli-binary-format raw-in-base64-out --cli-read-timeout 200 \
+  --payload '{"mode":"write"}' out.json
+cat out.json
+```
+
+Reading `coros` in the result:
+
+- `ok: true` → added exactly once, removed, and the other entries on that day
+  are unchanged.
+- `leftovers_removed` → test copies left over from an earlier attempt, removed
+  before adding.
+- `copies_after_add` / `duplicate: true` → how many copies one add call made.
+  **More than 1 is the known "two entries" bug: record it.**
+- `returned_id_matched` → whether the id COROS returned for the add is one of the
+  copies found (diagnostic only; removal goes by the test name).
+- `removed`, `remove_returned_none` (should be `true`), `copies_after_remove`
+  (should be 0).
+- `other_entries_before` / `other_entries_after` → other workouts on the test day;
+  they must be equal. Only entries named exactly `CADENCE TEST – delete me` on
+  that day are ever removed.
+- `failed_stage` + `error_type` → where it broke. Cleanup still runs after any
+  failure past login; `cleanup_failed_stage` means cleanup itself failed, so
+  **delete the test run by hand in the COROS app**.
+
+Then open the COROS app and check the test day (`day` in the result) shows no
+test entry.
+
+### 3. Contents check (once, by hand)
+
+```sh
+aws lambda invoke --region ap-southeast-2 \
+  --function-name "$(terraform output -raw function_name)" \
+  --cli-binary-format raw-in-base64-out --cli-read-timeout 200 \
+  --payload '{"mode":"contents"}' out.json
+cat out.json
+```
+
+`coros.next_7_days` lists date, name and planned minutes; `speediance.last_7_days`
+lists date, name and minutes. Paste it into the chat to compare with your apps,
+then delete it: `rm out.json`. Don't paste it onto the card.
+
+Caveat: speediance-cli was written for a different Speediance model. If the GM2
+list is empty or looks wrong, that's a finding, not a bug in this spike.
+
+### 4. Collect the 7 nightly results
+
+After the 7th night (logs are kept for 14 days):
+
+```sh
+aws logs filter-log-events --region ap-southeast-2 \
+  --log-group-name "/aws/lambda/$(terraform output -raw function_name)" \
+  --filter-pattern '{ $.mode = "nightly" }' \
+  --query 'events[].message' --output text
+```
+
+Each line has `date`, then for `coros` and `speediance`: `ok`, `stage`,
+`error_type` (only on failure; `exit_2` from Speediance means an auth failure) and
+`duration_ms`. A missing night means the schedule didn't fire or the run timed
+out: check `aws logs filter-log-events ... --filter-pattern 'REPORT'` for that date.
+
+Record on CAD-94:
+
+| Night (Melbourne) | COROS ok | COROS stage / error | COROS ms | Speediance ok | Speediance stage / error | Speediance ms |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | | | | | | |
+| 2 | | | | | | |
+| 3 | | | | | | |
+| 4 | | | | | | |
+| 5 | | | | | | |
+| 6 | | | | | | |
+| 7 | | | | | | |
+
+Plus the write test counts, whether the contents matched your apps, and whether
+the COROS phone app stayed logged in all week.
+
+### 5. Tear down
+
+Use the same variables you deployed with, then the checks in
+[Teardown](#teardown) below:
+
+```sh
+terraform workspace select ap-southeast-2
+terraform destroy -var region=ap-southeast-2 \
+  -var nightly_enabled=true \
+  -var nightly_start_date=2026-10-02T00:00:00Z \
+  -var nightly_end_date=2026-10-08T12:30:00Z
+```
+
 ## Teardown
 
 Each region has its own local state, so destroy **once per region**:
@@ -168,10 +295,12 @@ for r in ap-southeast-2 ap-southeast-4; do
     --query 'ResourceTagMappingList[].ResourceARN'
   aws secretsmanager list-secrets --region "$r" \
     --filters Key=name,Values=cadence-spike-cad83 --query 'SecretList[].Name'
+  aws scheduler list-schedules --region "$r" \
+    --name-prefix cadence-spike --query 'Schedules[].Name'
 done
 ```
 
-(The IAM role is global; check with
+(The IAM roles, including the CAD-94 `...-scheduler` role, are global; check with
 `aws iam list-roles --query "Roles[?starts_with(RoleName, 'cadence-spike-cad83')].RoleName"`.)
 
 Finally clean up locally:

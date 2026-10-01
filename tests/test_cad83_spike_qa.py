@@ -438,7 +438,9 @@ def test_terraform_function_matches_lambda_constraints():
     for key in SECRETS:
         assert key not in tf
     assert 'purpose = "cad-83-spike"' in tf
-    assert "aws_scheduler_schedule" not in tf
+    # CAD-94 adds a nightly schedule, but only when explicitly enabled.
+    schedule = re.search(r'resource "aws_scheduler_schedule" "nightly" \{\n\s*count = var\.nightly_enabled \? 1 : 0', tf)
+    assert tf.count("aws_scheduler_schedule\"") == 1 and schedule
     assert "backend \"s3\"" not in tf
 
 
