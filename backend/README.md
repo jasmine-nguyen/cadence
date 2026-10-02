@@ -53,3 +53,8 @@ It exits 0 with the week, or 1 with the stage (`read` or `plan`) and status
 (`refusal`, `api_error`, `malformed`, `max_tokens`) if something failed.
 
 **Cost:** roughly US$0.13 per suggested week on Claude Opus 5.5 (an estimate).
+
+To run the same code in AWS, use the `plan` mode of the CAD-83/94 spike test
+function: see "CAD-95: suggested week" in `spikes/cad83_lambda_reachability/README.md`.
+The week comes back in the invoke response only; the logs keep status, timings and
+token counts.

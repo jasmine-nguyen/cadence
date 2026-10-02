@@ -17,6 +17,11 @@ Modes, picked by `event["mode"]`:
   just ok/stage/error_type/duration_ms per service.
 - `nightly` (CAD-94, scheduled): login + read only, no writes. Returns and logs
   only ok/stage/error_type/duration_ms per service, never error text or contents.
+- `plan` (CAD-95, manual): runs the real backend code (`backend.suggest`) to read
+  COROS and ask Claude for a suggested next 7 days. The plan goes in the invoke
+  response only; the log line keeps status, timings and token usage. Read-only:
+  nothing is written to COROS, Speediance isn't called, and the COROS mobile login
+  is never used.
 
 Speediance is only ever asked to `login` or list `workouts`; nothing is pushed.
 """
@@ -44,7 +49,9 @@ COROS_RUN_SPORT_TYPE = 100  # coros-mcp rejects wire id 1 for runs
 COROS_HEART_RATE_TARGET = 2
 NIGHTLY_FIELDS = ("ok", "stage", "error_type", "duration_ms")
 WRITE_ERROR_TEXT = ("error", "cleanup_error")  # kept in the write response, never logged
-MODES = (None, "write", "contents", "nightly")
+MODES = (None, "write", "contents", "nightly", "plan")
+# Plan mode logs only these; the plan itself (dates, sessions, reasons) stays in the reply.
+PLAN_LOG_FIELDS = ("ok", "stage", "status", "error_type", "duration_ms", "coros_ms", "claude_ms", "usage")
 
 
 def _load_secret():
@@ -446,6 +453,24 @@ def _nightly(creds):
     }
 
 
+# --- CAD-95: suggested week ------------------------------------------------
+
+
+def _plan(creds):
+    """Returns (response, log line). The suggested week goes in the response only."""
+    started = time.monotonic()
+    try:
+        _coros_api()  # points HOME at /tmp before coros-mcp is first imported
+        from backend.suggest import suggest_week
+    except Exception as error:
+        result = {"ok": False, "stage": "import", "error_type": type(error).__name__, "duration_ms": _elapsed_ms(started)}
+    else:
+        result = suggest_week(creds)
+    result = {"mode": "plan", **result}
+    log_line = {"mode": "plan", **{key: result[key] for key in PLAN_LOG_FIELDS if key in result}}
+    return result, log_line
+
+
 # --- Entry point -------------------------------------------------------------
 
 
@@ -481,6 +506,8 @@ def handler(event, context):
         log_line = {"mode": "write", "coros": {k: v for k, v in write.items() if k not in WRITE_ERROR_TEXT}}
     elif mode == "contents":
         result, log_line = _contents(creds, secrets)
+    elif mode == "plan":
+        result, log_line = _plan(creds)
     else:
         result = log_line = _nightly(creds)
 

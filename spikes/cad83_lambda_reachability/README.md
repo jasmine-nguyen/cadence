@@ -275,6 +275,78 @@ terraform destroy -var region=ap-southeast-2 \
   -var nightly_end_date=2026-10-08T12:30:00Z
 ```
 
+## CAD-95: suggested week (`plan` mode, Sydney only)
+
+`{"mode":"plan"}` runs the real backend code (`backend/suggest.py`, the same as
+`python -m backend.suggest` on the Mac): it reads the last 28 days of COROS data
+and asks Claude (Opus 5.5) for a suggested next 7 days, tomorrow plus 6.
+
+- **Read-only.** Nothing is written to COROS, Speediance isn't called, and only
+  the web login is used (never the mobile login that may log the phone app out).
+- **The plan is in the invoke response only.** The CloudWatch line holds `ok`,
+  `stage`, `status`, `error_type`, the timings (`duration_ms`, `coros_ms`,
+  `claude_ms`) and token `usage`. No dates, sessions, reasons or rationale.
+- The `nightly` mode and schedule are unchanged.
+
+### 1. Add the Claude key to the secret
+
+`put-secret-value` **replaces the whole secret**, so add `CLAUDE_API_KEY` to the
+same `creds.json` as in step 3 above, keeping every existing key:
+
+```json
+{
+  "COROS_EMAIL": "...",
+  "COROS_PASSWORD": "...",
+  "SPEEDIANCE_EMAIL": "...",
+  "SPEEDIANCE_PASSWORD": "...",
+  "CLAUDE_API_KEY": "..."
+}
+```
+
+Use the name `CLAUDE_API_KEY`, never `ANTHROPIC_API_KEY`. Put it with the same
+`aws secretsmanager put-secret-value` command as step 3, then delete the file.
+
+### 2. Rebuild and redeploy
+
+`build.sh` now also bundles `backend/` and its arm64 wheels (the `anthropic`
+SDK), and the function timeout is 600 s. Rebuild (step 1), then apply with **the
+same variables as the CAD-94 deploy** so the nightly runs (2–8 October) carry on:
+
+```sh
+terraform workspace select ap-southeast-2
+terraform apply -var region=ap-southeast-2 \
+  -var nightly_enabled=true \
+  -var nightly_start_date=2026-10-02T00:00:00Z \
+  -var nightly_end_date=2026-10-08T12:30:00Z
+```
+
+### 3. Ask for a week
+
+The Claude call can take a few minutes, so turn off the CLI read timeout:
+
+```sh
+aws lambda invoke --region ap-southeast-2 \
+  --function-name "$(terraform output -raw function_name)" \
+  --cli-read-timeout 0 --cli-binary-format raw-in-base64-out \
+  --payload '{"mode":"plan"}' out.json
+cat out.json
+```
+
+Reading the result:
+
+- `ok: true` → `plan.days` has 7 days (date, session type, minutes, HR target,
+  reason) and `plan.rationale` says why.
+- `stage: "read"` → the COROS read failed (`error_type` says how).
+- `stage: "plan"` with `status` `refusal`, `api_error`, `malformed` or
+  `max_tokens` → Claude didn't give a usable week.
+- `stage: "import"` → the package is missing a module: rebuild.
+
+Delete `out.json` when you're done. After the next 22:00 run, check the
+`nightly` log line still shows `ok` (step 4 of CAD-94).
+
+**Cost:** about US$0.13 per plan on Opus 5.5 (an estimate; `usage` in the
+result has the real token counts).
+
 ## Teardown
 
 Each region has its own local state, so destroy **once per region**:
