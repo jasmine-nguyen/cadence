@@ -27,8 +27,12 @@ mkdir -p package wheels build
 python3 -m pip wheel --no-deps -w wheels/ "$COROS_MCP"
 python3 -m pip install --no-deps --no-index --find-links wheels/ coros-mcp -t package/
 
-# The modules coros-mcp actually uses, as manylinux arm64 wheels for Python 3.12.
-python3 -m pip install -r requirements.txt \
+# CAD-95: the backend's own pins (anthropic), minus coros-mcp, installed above.
+grep -v '^coros-mcp' ../../backend/requirements.txt >build/backend-requirements.txt
+
+# The modules coros-mcp actually uses plus the backend's, as manylinux arm64
+# wheels for Python 3.12.
+python3 -m pip install -r requirements.txt -r build/backend-requirements.txt \
   --platform manylinux2014_aarch64 \
   --only-binary=:all: \
   --python-version 3.12 \
@@ -36,6 +40,12 @@ python3 -m pip install -r requirements.txt \
   -t package/
 
 cp handler.py __init__.py package/
+# CAD-95 plan mode imports backend.suggest. Copy the source files only: never
+# .venv, .env or token caches.
+mkdir -p package/backend/planners package/backend/prompts
+cp ../../backend/*.py package/backend/
+cp ../../backend/planners/*.py package/backend/planners/
+cp ../../backend/prompts/* package/backend/prompts/
 cp "$BINARY" package/speediance-cli
 chmod +x package/speediance-cli
 

@@ -102,7 +102,7 @@ resource "aws_lambda_function" "spike" {
   architectures    = ["arm64"]
   runtime          = "python3.12"
   handler          = "handler.handler"
-  timeout          = 180
+  timeout          = 600 # CAD-95 plan mode: COROS reads plus one Claude call (client timeout 540s)
   memory_size      = 512
   filename         = local.zip
   source_code_hash = filebase64sha256(local.zip)

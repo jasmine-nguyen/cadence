@@ -1,3 +1,5 @@
 # Backend (Lambda) dependencies.
 # Separate from the root requirements.txt, which is build-graph tooling.
 # Pin exact versions (package==x.y.z).
+anthropic==1.11.0
+coros-mcp @ git+https://github.com/cygnusb/coros-mcp@2964e23be7425e7d8092271c677b09f2ccc530cd
