@@ -22,6 +22,10 @@ Modes, picked by `event["mode"]`:
   response only; the log line keeps status, timings and token usage. Read-only:
   nothing is written to COROS, Speediance isn't called, and the COROS mobile login
   is never used.
+- `sleep` (CAD-95, manual, run once): finds out whether coros-mcp's mobile
+  (phone-app style) login logs Jas's COROS phone app out. Mobile login only, then
+  the last SLEEP_NIGHTS nights of sleep-stage minutes in the invoke response only;
+  the log line keeps just ok/stage/error_type/duration_ms. Never scheduled.
 
 Speediance is only ever asked to `login` or list `workouts`; nothing is pushed.
 """
@@ -49,7 +53,8 @@ COROS_RUN_SPORT_TYPE = 100  # coros-mcp rejects wire id 1 for runs
 COROS_HEART_RATE_TARGET = 2
 NIGHTLY_FIELDS = ("ok", "stage", "error_type", "duration_ms")
 WRITE_ERROR_TEXT = ("error", "cleanup_error")  # kept in the write response, never logged
-MODES = (None, "write", "contents", "nightly", "plan")
+MODES = (None, "write", "contents", "nightly", "plan", "sleep")
+SLEEP_NIGHTS = 3
 # Plan mode logs only these; the plan itself (dates, sessions, reasons) stays in the reply.
 PLAN_LOG_FIELDS = ("ok", "stage", "status", "error_type", "duration_ms", "coros_ms", "claude_ms", "usage")
 
@@ -471,6 +476,60 @@ def _plan(creds):
     return result, log_line
 
 
+# --- CAD-95: one-off sleep login test ---------------------------------------
+# By hand only: it may log the COROS phone app out, which is exactly what it
+# tests. The web login (_coros_login) and coros-mcp's stored-auth writes are never
+# used; the mobile token lives in memory for this run. The rare token refresh
+# inside fetch_sleep may write the /tmp token store, which is harmless because
+# every other mode does a fresh web login().
+
+
+def _coros_sleep(creds):
+    started = time.monotonic()
+    stage = "import"
+    try:
+        coros_api = _coros_api()
+        from coros_mcp.models import StoredAuth
+
+        stage = "mobile_login"
+        region = os.environ.get("COROS_REGION", "us")
+        token, payload = asyncio.run(
+            coros_api._mobile_login(creds["COROS_EMAIL"], creds["COROS_PASSWORD"], region)
+        )
+        auth = StoredAuth(
+            access_token="",
+            user_id="",
+            region=region,
+            timestamp=int(time.time() * 1000),
+            mobile_access_token=token,
+            mobile_login_payload=payload,
+        )
+
+        stage = "read"
+        today = _melbourne_today()
+        first = today - timedelta(days=SLEEP_NIGHTS - 1)
+        records = asyncio.run(coros_api.fetch_sleep(auth, first.strftime("%Y%m%d"), today.strftime("%Y%m%d")))
+
+        stage = "summarise"
+        nights = []
+        for record in records:
+            phases = getattr(record, "phases", None)
+            nights.append(
+                {
+                    "date": _iso_from_ymd(record.date),
+                    "deep_min": getattr(phases, "deep_minutes", None),
+                    "light_min": getattr(phases, "light_minutes", None),
+                    "rem_min": getattr(phases, "rem_minutes", None),
+                    "awake_min": getattr(phases, "awake_minutes", None),
+                }
+            )
+        nights.sort(key=lambda night: night["date"] or "")
+    except Exception as error:
+        # Type only: error text could echo the server's reply.
+        return {"ok": False, "stage": stage, "duration_ms": _elapsed_ms(started), "error_type": type(error).__name__}
+    return {"ok": True, "stage": stage, "duration_ms": _elapsed_ms(started), "nights": nights}
+
+
 # --- Entry point -------------------------------------------------------------
 
 
@@ -508,6 +567,10 @@ def handler(event, context):
         result, log_line = _contents(creds, secrets)
     elif mode == "plan":
         result, log_line = _plan(creds)
+    elif mode == "sleep":
+        sleep = _coros_sleep(creds)
+        result = {"mode": "sleep", "coros": sleep}
+        log_line = {"mode": "sleep", "coros": _status_only(sleep)}
     else:
         result = log_line = _nightly(creds)
 

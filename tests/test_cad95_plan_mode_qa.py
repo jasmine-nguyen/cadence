@@ -1,8 +1,8 @@
 """QA for CAD-95 slice 2: the spike Lambda's `plan` mode, its packaging and Terraform.
 
 Adversarial companion to tests/test_cad95_plan_mode.py: failure paths through the
-real handler, the Melbourne date boundary, log hygiene on failure, the dropped
-`sleep` mode, and a real run of build.sh (with pip/file stubbed) to prove the
+real handler, the Melbourne date boundary, log hygiene on failure, and a real run
+of build.sh (with pip/file stubbed) to prove the
 bundled `backend/` package imports on its own.
 """
 
@@ -255,19 +255,6 @@ def test_plan_reply_is_json_serialisable_and_scrubs_echoed_secrets(spike, monkey
     assert result["ok"] is True
     assert SECRETS["COROS_EMAIL"] not in text and CLAUDE_KEY not in text
     assert "***" in result["plan"]["days"][0]["reason"]
-
-
-def test_sleep_mode_was_dropped_and_is_rejected_before_any_login(spike, monkeypatch, capsys):  # noqa: F811
-    # [A10] Critic tweak: no sleep mode on this card.
-    calls, speediance = _setup(spike, monkeypatch)
-    monkeypatch.setattr(spike, "_load_secret", lambda: pytest.fail("secret loaded for unknown mode"))
-
-    result = spike.handler({"mode": "sleep"}, None)
-
-    assert result == {"mode": "sleep", "ok": False, "error_type": "UnknownMode"}
-    assert calls == [] and speediance.calls == []
-    assert "sleep" not in spike.MODES
-    assert not hasattr(spike, "_coros_sleep")
 
 
 # --- Terraform --------------------------------------------------------------

@@ -347,6 +347,34 @@ Delete `out.json` when you're done. After the next 22:00 run, check the
 **Cost:** about US$0.13 per plan on Opus 5.5 (an estimate; `usage` in the
 result has the real token counts).
 
+### 4. Sleep test (once, by hand)
+
+Sleep stages only come through coros-mcp's mobile (phone-app style) login, and
+its README warns that this logs the COROS phone app out. `{"mode":"sleep"}`
+finds out whether it really does. It uses the mobile login only (never the web
+login), reads the last 3 nights and returns per-night minutes of deep, light,
+REM and awake sleep **in the invoke response only**. The log line keeps just
+`ok`, `stage`, `error_type` and `duration_ms`. It is never scheduled.
+
+1. Check the COROS phone app is logged in.
+2. Invoke it:
+
+   ```sh
+   aws lambda invoke --region ap-southeast-2 \
+     --function-name "$(terraform output -raw function_name)" \
+     --cli-binary-format raw-in-base64-out \
+     --payload '{"mode":"sleep"}' out.json
+   cat out.json
+   ```
+
+3. `coros.ok: true` → `coros.nights` has up to 3 nights (missing stages show as
+   `null`). Otherwise `coros.stage` says where it failed (`mobile_login` or
+   `read`) and `error_type` how; there's no error text, by design.
+4. Open the COROS phone app and record on CAD-95 whether it logged out. If it
+   did, log back in. **Don't repeat the test.**
+
+Delete `out.json` when you're done.
+
 ## Teardown
 
 Each region has its own local state, so destroy **once per region**:
