@@ -10,7 +10,7 @@ import time
 from datetime import date, datetime, timedelta
 
 from backend.coros_client import MELBOURNE, CorosReader
-from backend.planners.claude import ClaudePlanner, make_client
+from backend.workout_planners.claude import ClaudePlanner, make_client
 from backend.secrets import get_secrets
 
 KEYS = ("COROS_EMAIL", "COROS_PASSWORD", "COROS_REGION", "CLAUDE_API_KEY")

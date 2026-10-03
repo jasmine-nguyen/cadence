@@ -269,7 +269,7 @@ def test_terraform_timeout_covers_the_claude_client_timeout(spike, monkeypatch):
 
     seen = {}
     _install_anthropic(monkeypatch, seen)
-    from backend.planners.claude import make_client
+    from backend.workout_planners.claude import make_client
 
     make_client("k")
     assert seen["client_kwargs"]["timeout"] < lambda_timeout
@@ -332,8 +332,8 @@ def test_build_bundles_backend_sources_only_and_backend_wheels_for_arm64(tmp_pat
     package = spike_dir / "package"
     bundled = {str(p.relative_to(package)) for p in (package / "backend").rglob("*") if p.is_file()}
     for needed in ("backend/__init__.py", "backend/week_suggestion.py", "backend/coros_client.py",
-                   "backend/workout_planner.py", "backend/secrets.py", "backend/planners/__init__.py",
-                   "backend/planners/claude.py", "backend/prompts/coach_system.md"):
+                   "backend/workout_planner.py", "backend/secrets.py", "backend/workout_planners/__init__.py",
+                   "backend/workout_planners/claude.py", "backend/prompts/coach_system.md"):
         assert needed in bundled
     for name in bundled:
         assert ".env" not in name and ".venv" not in name and "__pycache__" not in name
@@ -342,7 +342,7 @@ def test_build_bundles_backend_sources_only_and_backend_wheels_for_arm64(tmp_pat
     # The bundle imports on its own (no repo checkout on sys.path), prompt included.
     probe = (
         "import sys; sys.path.insert(0, sys.argv[1]);"
-        "import backend.week_suggestion as s, backend.planners.claude as c;"
+        "import backend.week_suggestion as s, backend.workout_planners.claude as c;"
         "assert s.__file__.startswith(sys.argv[1]), s.__file__;"
         "assert c.PROMPT_PATH.is_file();"
         "print(c.PROMPT_PATH.read_text()[:20])"
