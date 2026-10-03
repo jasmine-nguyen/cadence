@@ -17,7 +17,7 @@ Modes, picked by `event["mode"]`:
   just ok/stage/error_type/duration_ms per service.
 - `nightly` (CAD-94, scheduled): login + read only, no writes. Returns and logs
   only ok/stage/error_type/duration_ms per service, never error text or contents.
-- `plan` (CAD-95, manual): runs the real backend code (`backend.suggest`) to read
+- `plan` (CAD-95, manual): runs the real backend code (`backend.week_suggestion`) to read
   COROS and ask Claude for a suggested next 7 days. The plan goes in the invoke
   response only; the log line keeps status, timings and token usage. Read-only:
   nothing is written to COROS, Speediance isn't called, and the COROS mobile login
@@ -472,7 +472,7 @@ def _plan(creds):
     started = time.monotonic()
     try:
         _coros_api()  # points HOME at /tmp before coros-mcp is first imported
-        from backend.suggest import suggest_week
+        from backend.week_suggestion import suggest_week
     except Exception as error:
         result = {"ok": False, "stage": "import", "error_type": type(error).__name__, "duration_ms": _elapsed_ms(started)}
     else:

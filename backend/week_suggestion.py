@@ -1,6 +1,6 @@
 """Suggest the next 7 days (tomorrow plus 6) from COROS data. Read-only: nothing is written.
 
-Run from the repo root:  python -m backend.suggest
+Run from the repo root:  python -m backend.week_suggestion
 """
 
 import dataclasses
@@ -10,8 +10,8 @@ import time
 from datetime import date, datetime, timedelta
 
 from backend.coros_client import MELBOURNE, CorosReader
-from backend.planners.claude import ClaudePlanner, make_client
-from backend.secrets import load_local_env
+from backend.workout_planners.claude import ClaudePlanner, make_client
+from backend.secrets import get_secrets
 
 KEYS = ("COROS_EMAIL", "COROS_PASSWORD", "COROS_REGION", "CLAUDE_API_KEY")
 
@@ -89,7 +89,7 @@ def format_week(result: dict) -> str:
 
 
 def main() -> int:
-    creds = load_local_env()
+    creds = get_secrets()
     for key in KEYS:
         if not creds.get(key) and os.environ.get(key):
             creds[key] = os.environ[key]

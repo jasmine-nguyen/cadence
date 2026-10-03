@@ -40,11 +40,11 @@ python3 -m pip install -r requirements.txt -r build/backend-requirements.txt \
   -t package/
 
 cp handler.py __init__.py package/
-# CAD-95 plan mode imports backend.suggest. Copy the source files only: never
+# CAD-95 plan mode imports backend.week_suggestion. Copy the source files only: never
 # .venv, .env or token caches.
-mkdir -p package/backend/planners package/backend/prompts
+mkdir -p package/backend/workout_planners package/backend/prompts
 cp ../../backend/*.py package/backend/
-cp ../../backend/planners/*.py package/backend/planners/
+cp ../../backend/workout_planners/*.py package/backend/workout_planners/
 cp ../../backend/prompts/* package/backend/prompts/
 cp "$BINARY" package/speediance-cli
 chmod +x package/speediance-cli

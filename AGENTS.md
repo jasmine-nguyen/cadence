@@ -45,7 +45,7 @@ cadence/
 │   ├── handler.py            # thin Lambda handler that calls run_nightly()
 │   ├── coros_client.py
 │   ├── speediance_client.py  # pending ADR-007
-│   ├── planner.py + planners/claude.py
+│   ├── workout_planner.py + workout_planners/claude.py
 │   ├── db.py
 │   ├── secrets.py            # Secrets Manager in AWS, .env locally
 │   ├── config.yaml
@@ -84,6 +84,12 @@ npx expo export -p ios --output-dir "$(mktemp -d)"
 - Default Lambda timeout is short — raise it; the Claude call and several API calls take time.
 - Target arm64 (Graviton). Any bundled binary must be built for `linux/arm64`.
 - Set `PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring` — coros-mcp's login otherwise tries to use a system keyring and hangs on headless machines.
+
+## Python conventions
+
+Follow these for every Python file and environment variable you name:
+
+@docs/python-conventions.md
 
 ## Working rules
 

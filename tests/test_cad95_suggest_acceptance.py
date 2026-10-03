@@ -1,6 +1,6 @@
 """Acceptance tests for CAD-95 slice 1: suggested week on the Mac.
 
-Seam: `backend.suggest.suggest_week(creds, reader=..., client=..., today=...)`.
+Seam: `backend.week_suggestion.suggest_week(creds, reader=..., client=..., today=...)`.
 Stand-ins replace only the system boundaries: the COROS reader (network) and the
 Claude client (network). No network, no anthropic SDK, no coros-mcp needed.
 """
@@ -154,7 +154,7 @@ def _as_dict(obj):
 
 
 def _call(reader, client):
-    from backend.suggest import suggest_week
+    from backend.week_suggestion import suggest_week
 
     return suggest_week(CREDS, reader=reader, client=client, today=TODAY)
 
