@@ -102,14 +102,15 @@ Follow these for every Python file and environment variable you name:
 
 ## Coding standards
 
-- No copy-pasted test code. Before writing setup or helper code in a test,
-  check `tests/support/` for one that already exists (create the folder the
-  first time it's needed). If the same setup would end up in 2+ test files,
-  move it into `tests/support/` in the same change and import it — never copy
-  it from another test file.
-- Plans must say "use / add a `tests/support/` tool" — never "copy the
-  pattern from <other test>".
-- Reviewers treat copied test code as a must-fix, not a follow-up card.
+- No copy-pasted code, in app code or tests. Before writing a function,
+  component, setup or helper, search for one that already exists (app code:
+  `src/components/`, `src/state/`, `src/features/`, `backend/`; tests:
+  `tests/support/`, created the first time it's needed). If the same code would
+  end up in 2+ files, move it into a shared place in the same change and import
+  it — never copy it from another file.
+- Plans must say "use / add a shared helper" — never "copy the pattern
+  from <other file>".
+- Reviewers treat copied code as a must-fix, not a follow-up card.
 
 ## Known gotchas
 
