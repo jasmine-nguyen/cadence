@@ -7,7 +7,7 @@ shape and reply handling can be tested without it.
 import json
 from pathlib import Path
 
-from backend.planner import PLAN_JSON_SCHEMA, PlanResult, parse_week
+from backend.workout_planner import PLAN_JSON_SCHEMA, PlanResult, parse_week
 
 PROMPT_PATH = Path(__file__).resolve().parent.parent / "prompts" / "coach_system.md"
 FALLBACK_BETA = "server-side-fallback-2026-07-01"

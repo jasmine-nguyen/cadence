@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo
 import pytest
 
 from backend import week_suggestion
-from backend.planner import PLAN_JSON_SCHEMA, parse_week
+from backend.workout_planner import PLAN_JSON_SCHEMA, parse_week
 from backend.secrets import load_local_env
 
 TODAY = date(2026, 10, 2)

@@ -45,7 +45,7 @@ cadence/
 │   ├── handler.py            # thin Lambda handler that calls run_nightly()
 │   ├── coros_client.py
 │   ├── speediance_client.py  # pending ADR-007
-│   ├── planner.py + planners/claude.py
+│   ├── workout_planner.py + planners/claude.py
 │   ├── db.py
 │   ├── secrets.py            # Secrets Manager in AWS, .env locally
 │   ├── config.yaml

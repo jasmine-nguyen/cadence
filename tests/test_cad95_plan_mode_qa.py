@@ -332,7 +332,7 @@ def test_build_bundles_backend_sources_only_and_backend_wheels_for_arm64(tmp_pat
     package = spike_dir / "package"
     bundled = {str(p.relative_to(package)) for p in (package / "backend").rglob("*") if p.is_file()}
     for needed in ("backend/__init__.py", "backend/week_suggestion.py", "backend/coros_client.py",
-                   "backend/planner.py", "backend/secrets.py", "backend/planners/__init__.py",
+                   "backend/workout_planner.py", "backend/secrets.py", "backend/planners/__init__.py",
                    "backend/planners/claude.py", "backend/prompts/coach_system.md"):
         assert needed in bundled
     for name in bundled:

@@ -17,7 +17,7 @@ from types import SimpleNamespace
 import pytest
 
 from backend import week_suggestion
-from backend.planner import parse_week
+from backend.workout_planner import parse_week
 from backend.planners import claude as claude_planner
 from backend.planners.claude import ClaudePlanner
 from backend.secrets import load_local_env
