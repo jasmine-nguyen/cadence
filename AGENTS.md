@@ -90,6 +90,7 @@ npx expo export -p ios --output-dir "$(mktemp -d)"
 - Never hardcode or commit secrets. `.env`, token caches, `*.tfvars`, `*.tfstate`, `.terraform/` are gitignored. Commit `.terraform.lock.hcl`.
 - Writes to COROS / Speediance should be idempotent: a retried run must not create duplicate workouts.
 - Coaching is conservative by default: when unsure, hold back rather than push harder.
+- Keep docs up to date in the same change (AGENTS.md, READMEs, ADRs and cards): short and to the point.
 - Jas prefers to be guided and to write code herself: explain choices, keep changes small, one card at a time.
 
 ## Known gotchas
