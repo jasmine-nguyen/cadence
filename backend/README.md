@@ -29,8 +29,36 @@ backend/.venv/bin/python -m backend.nightly
 ## Import gotcha
 
 Always import modules as `backend.x` and run from the repo root. Never put
-`backend/` itself on `sys.path`: the planned `backend/secrets.py` would then
-shadow the standard library's `secrets` module.
+`backend/` itself on `sys.path`: `backend/secrets.py` would then shadow the
+standard library's `secrets` module.
+
+## Secrets (CAD-44)
+
+All credentials come from one function, `backend.secrets.get_secrets()`, which
+returns a `dict[str, str]`:
+
+- **In AWS:** when the env var `CADENCE_SECRET_ID` is set, it reads that secret
+  from Secrets Manager once and keeps it in memory. Call `clear_cache()` at the
+  start of each run, because a warm Lambda keeps memory between runs.
+- **On the Mac:** otherwise it reads `.env` in the repo root. Copy
+  `.env.example`, then `chmod 600 .env`. `.env` is gitignored.
+
+The secret (`cadence/prod`) is one JSON object with the same keys as `.env`:
+`COROS_EMAIL`, `COROS_PASSWORD`, `COROS_REGION`, `CLAUDE_API_KEY`,
+`TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, and (pending ADR-007)
+`SPEEDIANCE_EMAIL`, `SPEEDIANCE_PASSWORD`, `SPEEDIANCE_REGION`,
+`SPEEDIANCE_DEVICE_TYPE`. Terraform creates it empty; set the value yourself:
+
+```sh
+aws secretsmanager put-secret-value --secret-id cadence/prod --secret-string file://creds.json
+rm creds.json   # creds.json is gitignored, but don't keep it around
+```
+
+CAD-81 must set `CADENCE_SECRET_ID` on the Lambda to the ARN of `cadence/prod`
+and allow `secretsmanager:GetSecretValue` on that ARN only (copy
+`spikes/cad83_lambda_reachability/main.tf`).
+
+Never log or print the dict. Errors (`SecretsError`) carry no values.
 
 ## Suggest a week (CAD-95)
 
