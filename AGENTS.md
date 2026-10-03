@@ -24,7 +24,8 @@ Three goals shape scope: (1) a real app Jas uses, (2) a portfolio piece for arch
 
 - **Develop on Mac**, in the existing GitHub repo `jasmine-nguyen/cadence`.
 - **Runtime: AWS Lambda**, triggered by **EventBridge Scheduler** at 22:00 **`Australia/Melbourne`** (Scheduler supports time zones; classic EventBridge cron rules are UTC-only). The Pi is no longer the runtime. To be recorded in ADR-008.
-- **IaC: Terraform.** State in S3 with native locking (`use_lockfile = true`). **No DynamoDB** — DynamoDB locking is deprecated. A one-time `infra/bootstrap` config creates the state bucket (versioning + encryption + block public access).
+- **IaC: Terraform.** State in S3 with native locking (`use_lockfile = true`). **No DynamoDB** — DynamoDB locking is deprecated. A one-time `infra/bootstrap` config creates the state bucket (versioning + encryption + block public access); `infra/main` names it in its backend block.
+- **AWS region: Sydney (`ap-southeast-2`)**, where the spike runs succeeded (Jas, 2026-10-03).
 - **Secrets: AWS Secrets Manager**, one secret holding a JSON object with all keys (COROS, Speediance, Claude, Turso). Terraform creates the empty secret only; values are set via CLI/console so they never appear in code or Terraform state.
 - **Database: Turso (serverless SQLite)** — ADR-006. Plain SQLite file for local dev.
 - **COROS: direct, no Intervals.icu (ADR-005).** Reads use COROS's official MCP server (`mcp.coros.com`). The community library `cygnusb/coros-mcp` is used only for what the official server can't do, such as deleting scheduled workouts (Jas, 2026-10-03).
@@ -129,7 +130,6 @@ Follow these for every Python file and environment variable you name:
 
 ## Open questions (not yet decided)
 
-- AWS region: Sydney (`ap-southeast-2`) or Melbourne (`ap-southeast-4`).
 - Threshold pace calibration for pace-targeted runs.
 - Base weekly split (run / strength / rest days): decide once the app works. Until then: 4 run days, no strength.
 
