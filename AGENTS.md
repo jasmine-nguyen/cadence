@@ -27,7 +27,7 @@ Three goals shape scope: (1) a real app Jas uses, (2) a portfolio piece for arch
 - **IaC: Terraform.** State in S3 with native locking (`use_lockfile = true`). **No DynamoDB** — DynamoDB locking is deprecated. A one-time `infra/bootstrap` config creates the state bucket (versioning + encryption + block public access).
 - **Secrets: AWS Secrets Manager**, one secret holding a JSON object with all keys (COROS, Speediance, Claude, Turso). Terraform creates the empty secret only; values are set via CLI/console so they never appear in code or Terraform state.
 - **Database: Turso (serverless SQLite)** — ADR-006. Plain SQLite file for local dev.
-- **COROS: direct, via the community library `cygnusb/coros-mcp` used as a Python library** (not as an MCP server) — ADR-005. No Intervals.icu.
+- **COROS: direct, no Intervals.icu (ADR-005).** Reads use COROS's official MCP server (`mcp.coros.com`). The community library `cygnusb/coros-mcp` is used only for what the official server can't do, such as deleting scheduled workouts (Jas, 2026-10-03).
 - **AI: Claude API behind a swappable planner interface** so another provider can be added later.
 - **When Claude is called (ADR-009):** only for a new plan (new goal or block) and for adjustments. The nightly check is plain code; most nights change nothing. Jas's edits (sick, period, skip, pause) come from the app; skip and pause need no AI. Claude Code Routines only for optional jobs, never the nightly check.
 - **Strength content: pending ADR-007** (Fitbod vs Cadence-generated workouts pushed to the GM2). Cards marked "pending ADR-007" must not start until it's decided.
@@ -90,6 +90,7 @@ npx expo export -p ios --output-dir "$(mktemp -d)"
 - Never hardcode or commit secrets. `.env`, token caches, `*.tfvars`, `*.tfstate`, `.terraform/` are gitignored. Commit `.terraform.lock.hcl`.
 - Writes to COROS / Speediance should be idempotent: a retried run must not create duplicate workouts.
 - Coaching is conservative by default: when unsure, hold back rather than push harder.
+- App screens never send Jas out to COROS or a browser: show the data in the app. iPhone sizes only, no iPad.
 - Keep docs up to date in the same change (AGENTS.md, READMEs, ADRs and cards): short and to the point.
 - Jas prefers to be guided and to write code herself: explain choices, keep changes small, one card at a time.
 
@@ -111,9 +112,8 @@ npx expo export -p ios --output-dir "$(mktemp -d)"
 ## Open questions (not yet decided)
 
 - AWS region: Sydney (`ap-southeast-2`) or Melbourne (`ap-southeast-4`).
-- Whether to move all COROS reads and writes from coros-mcp to the official MCP server.
 - Threshold pace calibration for pace-targeted runs.
-- Base weekly split (run / strength / rest days).
+- Base weekly split (run / strength / rest days): decide once the app works. Until then: 4 run days, no strength.
 
 ## Outdated documents — don't follow these parts
 
