@@ -127,7 +127,7 @@ def test_malformed_week_is_reported_and_its_text_never_logged(spike, monkeypatch
     # [A3] Six days instead of seven.
     _setup(spike, monkeypatch)
     today = datetime.now(spike.MELBOURNE).date()
-    from backend.suggest import plan_dates
+    from backend.week_suggestion import plan_dates
 
     _install_anthropic(monkeypatch, {}, text=json.dumps(_week(plan_dates(today)[:6], reason=SECRET_TEXT)))
 
@@ -183,7 +183,7 @@ def test_missing_backend_module_is_stage_import(spike, monkeypatch, capsys):  # 
     # [A6] A package built without backend/ reports import, not a crash.
     _setup(spike, monkeypatch)
     _install_anthropic(monkeypatch, {})
-    monkeypatch.setitem(sys.modules, "backend.suggest", None)  # import raises ImportError
+    monkeypatch.setitem(sys.modules, "backend.week_suggestion", None)  # import raises ImportError
 
     result = spike.handler({"mode": "plan"}, None)
     log = _last_log_line(capsys.readouterr().out)
@@ -217,7 +217,7 @@ def test_plan_mode_points_home_at_tmp_before_coros_login(spike, monkeypatch):  #
 def test_plan_dates_follow_melbourne_not_utc_across_midnight(spike, monkeypatch):  # noqa: F811
     # [A8] 14:30 UTC on 2 Oct is 00:30 on 3 Oct in Melbourne: tomorrow is 4 Oct.
     _setup(spike, monkeypatch)
-    import backend.suggest as suggest
+    import backend.week_suggestion as suggest
 
     fixed = datetime(2026, 10, 2, 14, 30, tzinfo=timezone.utc)
 
@@ -242,7 +242,7 @@ def test_plan_reply_is_json_serialisable_and_scrubs_echoed_secrets(spike, monkey
     # [A9] Lambda must serialise the reply; a reason echoing a credential is masked.
     _setup(spike, monkeypatch)
     today = datetime.now(spike.MELBOURNE).date()
-    from backend.suggest import plan_dates
+    from backend.week_suggestion import plan_dates
 
     echoed = f"Email {SECRETS['COROS_EMAIL']} key {CLAUDE_KEY}"
     _install_anthropic(monkeypatch, {}, text=json.dumps(_week(plan_dates(today), reason=echoed)))
@@ -307,7 +307,7 @@ def test_build_bundles_backend_sources_only_and_backend_wheels_for_arm64(tmp_pat
     (root / "backend" / ".venv").mkdir()
     (root / "backend" / ".venv" / "x.py").write_text("")
     (root / "backend" / "__pycache__").mkdir()
-    (root / "backend" / "__pycache__" / "suggest.cpython-311.pyc").write_bytes(b"")
+    (root / "backend" / "__pycache__" / "week_suggestion.cpython-311.pyc").write_bytes(b"")
 
     stubs = tmp_path / "stubs"
     stubs.mkdir()
@@ -331,7 +331,7 @@ def test_build_bundles_backend_sources_only_and_backend_wheels_for_arm64(tmp_pat
 
     package = spike_dir / "package"
     bundled = {str(p.relative_to(package)) for p in (package / "backend").rglob("*") if p.is_file()}
-    for needed in ("backend/__init__.py", "backend/suggest.py", "backend/coros_client.py",
+    for needed in ("backend/__init__.py", "backend/week_suggestion.py", "backend/coros_client.py",
                    "backend/planner.py", "backend/secrets.py", "backend/planners/__init__.py",
                    "backend/planners/claude.py", "backend/prompts/coach_system.md"):
         assert needed in bundled
@@ -342,7 +342,7 @@ def test_build_bundles_backend_sources_only_and_backend_wheels_for_arm64(tmp_pat
     # The bundle imports on its own (no repo checkout on sys.path), prompt included.
     probe = (
         "import sys; sys.path.insert(0, sys.argv[1]);"
-        "import backend.suggest as s, backend.planners.claude as c;"
+        "import backend.week_suggestion as s, backend.planners.claude as c;"
         "assert s.__file__.startswith(sys.argv[1]), s.__file__;"
         "assert c.PROMPT_PATH.is_file();"
         "print(c.PROMPT_PATH.read_text()[:20])"

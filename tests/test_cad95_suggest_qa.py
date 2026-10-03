@@ -16,7 +16,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from backend import suggest
+from backend import week_suggestion
 from backend.planner import parse_week
 from backend.planners import claude as claude_planner
 from backend.planners.claude import ClaudePlanner
@@ -105,7 +105,7 @@ def test_real_sdk_sends_the_request_with_claude_api_key_not_anthropic_api_key(mo
 
     monkeypatch.setattr(anthropic, "Anthropic", with_mock_transport)
 
-    result = suggest.suggest_week(CREDS, reader=Reader(), today=TODAY)
+    result = week_suggestion.suggest_week(CREDS, reader=Reader(), today=TODAY)
 
     assert result["ok"] is True, result
     assert [d["date"] for d in result["plan"]["days"]] == DATES
@@ -133,7 +133,7 @@ def test_make_client_passes_claude_api_key_explicitly(monkeypatch):
     monkeypatch.setitem(sys.modules, "anthropic", fake)
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
 
-    result = suggest.suggest_week(CREDS, reader=Reader(), today=TODAY)
+    result = week_suggestion.suggest_week(CREDS, reader=Reader(), today=TODAY)
 
     assert made and made[0]["api_key"] == "sk-claude"
     assert made[0].get("timeout", 0) >= 300
@@ -148,7 +148,7 @@ def test_missing_claude_key_is_reported_not_raised(monkeypatch):
     monkeypatch.setitem(sys.modules, "anthropic", fake)
     creds = {k: v for k, v in CREDS.items() if k != "CLAUDE_API_KEY"}
 
-    result = suggest.suggest_week(creds, reader=Reader(), today=TODAY)
+    result = week_suggestion.suggest_week(creds, reader=Reader(), today=TODAY)
 
     assert (result["ok"], result["stage"], result["status"], result["error_type"]) == (
         False, "plan", "api_error", "KeyError")
@@ -167,12 +167,12 @@ def test_default_today_is_melbournes_date_not_utc(monkeypatch):
         def now(cls, tz=None):
             return instant.astimezone(tz) if tz else instant.replace(tzinfo=None)
 
-    monkeypatch.setattr(suggest, "datetime", FrozenDatetime)
+    monkeypatch.setattr(week_suggestion, "datetime", FrozenDatetime)
     reader = Reader()
     expected = [(date(2026, 10, 3) + timedelta(days=i)).isoformat() for i in range(1, 8)]
     client = Client([_text(json.dumps(_week(expected)))])
 
-    result = suggest.suggest_week(CREDS, reader=reader, client=client)
+    result = week_suggestion.suggest_week(CREDS, reader=reader, client=client)
 
     assert reader.calls == [date(2026, 10, 3)]
     assert result["ok"] is True, result
@@ -181,7 +181,7 @@ def test_default_today_is_melbournes_date_not_utc(monkeypatch):
 
 def test_plan_dates_cross_month_and_dst_boundaries():
     # [A5] (P1) tomorrow plus 6, plain calendar days across the 4 Oct DST change and month end
-    assert suggest.plan_dates(date(2026, 9, 28)) == [
+    assert week_suggestion.plan_dates(date(2026, 9, 28)) == [
         "2026-09-29", "2026-09-30", "2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04", "2026-10-05"]
 
 
@@ -220,7 +220,7 @@ def test_text_split_across_blocks_is_joined_and_thinking_ignored():
     text = json.dumps(_week())
     blocks = [SimpleNamespace(type="thinking", thinking="{not json", text="{not json", signature="s"),
               _text(text[:40]), _text(text[40:])]
-    result = suggest.suggest_week(CREDS, reader=Reader(), client=Client(blocks), today=TODAY)
+    result = week_suggestion.suggest_week(CREDS, reader=Reader(), client=Client(blocks), today=TODAY)
     assert result["ok"] is True, result
 
 
@@ -231,7 +231,7 @@ def test_text_split_across_blocks_is_joined_and_thinking_ignored():
 )
 def test_odd_json_replies_are_malformed_with_usage(reply):
     # [A9] (P1) non-object / empty replies → malformed, usage still reported
-    result = suggest.suggest_week(CREDS, reader=Reader(), client=Client([_text(reply)]), today=TODAY)
+    result = week_suggestion.suggest_week(CREDS, reader=Reader(), client=Client([_text(reply)]), today=TODAY)
     assert (result["ok"], result["stage"], result["status"]) == (False, "plan", "malformed")
     assert result["usage"] == {"input_tokens": 7, "output_tokens": 9}
     assert "plan" not in result
@@ -240,7 +240,7 @@ def test_odd_json_replies_are_malformed_with_usage(reply):
 def test_refusal_with_no_content_is_refusal():
     # [A10] (P0) refusal is reported even when content is empty or missing
     for content in ([], None):
-        result = suggest.suggest_week(CREDS, reader=Reader(), client=Client(content, "refusal"), today=TODAY)
+        result = week_suggestion.suggest_week(CREDS, reader=Reader(), client=Client(content, "refusal"), today=TODAY)
         assert (result["ok"], result["status"], result["error_type"]) == (False, "refusal", "refusal")
 
 
@@ -382,7 +382,7 @@ def test_missing_coros_library_is_a_read_failure(monkeypatch):
     # [A17] (P1) coros-mcp not installed → stage read, no Claude call
     monkeypatch.setitem(sys.modules, "coros_mcp", None)
     client = Client([_text(json.dumps(_week()))])
-    result = suggest.suggest_week(CREDS, client=client, today=TODAY)
+    result = week_suggestion.suggest_week(CREDS, client=client, today=TODAY)
     assert (result["ok"], result["stage"], result["status"]) == (False, "read", "read_error")
     assert result["error_type"] in ("ImportError", "ModuleNotFoundError")
     assert client.calls == []
@@ -427,8 +427,8 @@ def test_main_env_file_wins_and_environment_fills_gaps(tmp_path, monkeypatch, ca
         seen.update(creds)
         return {"ok": False, "stage": "plan", "status": "api_error", "error_type": "KeyError"}
 
-    monkeypatch.setattr(suggest, "suggest_week", fake)
-    assert suggest.main() == 1
+    monkeypatch.setattr(week_suggestion, "suggest_week", fake)
+    assert week_suggestion.main() == 1
     assert seen["COROS_EMAIL"] == "file@example.com"
     assert seen["COROS_PASSWORD"] == "env-pw"
     assert not seen.get("CLAUDE_API_KEY")
@@ -438,8 +438,8 @@ def test_main_env_file_wins_and_environment_fills_gaps(tmp_path, monkeypatch, ca
 
 def test_format_week_shows_dash_for_rest_and_says_nothing_written():
     # [A20] (P2) printed table: weekday, '-' HR target on rest days, rationale, read-only note
-    result = suggest.suggest_week(CREDS, reader=Reader(), client=Client([_text(json.dumps(_week()))]), today=TODAY)
-    out = suggest.format_week(result)
+    result = week_suggestion.suggest_week(CREDS, reader=Reader(), client=Client([_text(json.dumps(_week()))]), today=TODAY)
+    out = week_suggestion.format_week(result)
     lines = out.splitlines()
     assert lines[1].startswith("Sat 10-03") and "walk_run" in lines[1]
     assert lines[2].startswith("Sun 10-04") and " - " in lines[2] and "rest" in lines[2]

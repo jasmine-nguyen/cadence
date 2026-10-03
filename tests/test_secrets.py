@@ -1,4 +1,4 @@
-"""CAD-44 acceptance: one way to get credentials — Secrets Manager in Lambda, `.env` on the Mac."""
+"""One way to get credentials — Secrets Manager in Lambda, `.env` on the Mac."""
 
 import json
 import os
@@ -20,7 +20,7 @@ CREDS = {
 
 @pytest.fixture(autouse=True)
 def _fresh_cache(monkeypatch):
-    monkeypatch.delenv("CADENCE_SECRET_ID", raising=False)
+    monkeypatch.delenv("CADENCE_AWS_SECRET_ID", raising=False)
     secrets.clear_cache()
     yield
     secrets.clear_cache()
@@ -45,7 +45,7 @@ def test_local_mode_returns_env_file_credentials_without_aws(tmp_path, monkeypat
 
 def test_lambda_mode_reads_secret_once_per_run_with_same_shape_and_clean_errors(monkeypatch, capsys):
     secret_arn = "arn:aws:secretsmanager:ap-southeast-2:123456789012:secret:cadence/prod-AbCdEf"
-    monkeypatch.setenv("CADENCE_SECRET_ID", secret_arn)
+    monkeypatch.setenv("CADENCE_AWS_SECRET_ID", secret_arn)
 
     calls = []
     payload = {"SecretString": json.dumps(CREDS)}

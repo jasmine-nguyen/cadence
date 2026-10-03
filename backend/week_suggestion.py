@@ -1,6 +1,6 @@
 """Suggest the next 7 days (tomorrow plus 6) from COROS data. Read-only: nothing is written.
 
-Run from the repo root:  python -m backend.suggest
+Run from the repo root:  python -m backend.week_suggestion
 """
 
 import dataclasses

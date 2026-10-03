@@ -1,18 +1,18 @@
-"""CAD-44 edge cases for `get_secrets()`: value types, bad secrets, and `suggest.main()` in AWS mode."""
+"""Edge cases for `get_secrets()`: value types, bad secrets, and `week_suggestion.main()` in AWS mode."""
 
 import json
 import sys
 
 import pytest
 
-from backend import secrets, suggest
+from backend import secrets, week_suggestion
 
 ARN = "arn:aws:secretsmanager:ap-southeast-2:123456789012:secret:cadence/prod-AbCdEf"
 
 
 @pytest.fixture(autouse=True)
 def _fresh_cache(monkeypatch):
-    monkeypatch.delenv("CADENCE_SECRET_ID", raising=False)
+    monkeypatch.delenv("CADENCE_AWS_SECRET_ID", raising=False)
     secrets.clear_cache()
     yield
     secrets.clear_cache()
@@ -28,7 +28,7 @@ def _fake_aws(monkeypatch, secret_string=None, error=None):
     fake_boto3 = type(sys)("boto3")
     fake_boto3.client = lambda service, *a, **kw: FakeClient()
     monkeypatch.setitem(sys.modules, "boto3", fake_boto3)
-    monkeypatch.setenv("CADENCE_SECRET_ID", ARN)
+    monkeypatch.setenv("CADENCE_AWS_SECRET_ID", ARN)
 
 
 def test_numbers_become_strings_and_null_becomes_empty(monkeypatch):
@@ -77,7 +77,7 @@ def test_suggest_main_uses_the_aws_secret_and_environment_fills_empty_keys(tmp_p
         seen.update(creds)
         return {"ok": False, "stage": "read", "status": "read_error", "error_type": "X"}
 
-    monkeypatch.setattr(suggest, "suggest_week", fake)
-    assert suggest.main() == 1
+    monkeypatch.setattr(week_suggestion, "suggest_week", fake)
+    assert week_suggestion.main() == 1
     assert seen["COROS_EMAIL"] == "jas@example.com"
     assert seen["COROS_PASSWORD"] == "env-pw"

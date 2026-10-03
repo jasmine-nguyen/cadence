@@ -32,12 +32,12 @@ Always import modules as `backend.x` and run from the repo root. Never put
 `backend/` itself on `sys.path`: `backend/secrets.py` would then shadow the
 standard library's `secrets` module.
 
-## Secrets (CAD-44)
+## Secrets
 
 All credentials come from one function, `backend.secrets.get_secrets()`, which
 returns a `dict[str, str]`:
 
-- **In AWS:** when the env var `CADENCE_SECRET_ID` is set, it reads that secret
+- **In AWS:** when the env var `CADENCE_AWS_SECRET_ID` is set, it reads that secret
   from Secrets Manager once and keeps it in memory. Call `clear_cache()` at the
   start of each run, because a warm Lambda keeps memory between runs.
 - **On the Mac:** otherwise it reads `.env` in the repo root. Copy
@@ -54,7 +54,7 @@ aws secretsmanager put-secret-value --secret-id cadence/prod --secret-string fil
 rm creds.json   # creds.json is gitignored, but don't keep it around
 ```
 
-CAD-81 must set `CADENCE_SECRET_ID` on the Lambda to the ARN of `cadence/prod`
+CAD-81 must set `CADENCE_AWS_SECRET_ID` on the Lambda to the ARN of `cadence/prod`
 and allow `secretsmanager:GetSecretValue` on that ARN only (copy
 `spikes/cad83_lambda_reachability/main.tf`).
 
@@ -73,7 +73,7 @@ asks Claude for a suggested week (tomorrow plus 6 days) and prints it.
 2. From the repo root:
 
 ```sh
-PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring backend/.venv/bin/python -m backend.suggest
+PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring backend/.venv/bin/python -m backend.week_suggestion
 ```
 
 The keyring setting stops the COROS login trying to use the system keyring.

@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from backend import suggest
+from backend import week_suggestion
 from backend.planner import PLAN_JSON_SCHEMA, parse_week
 from backend.secrets import load_local_env
 
@@ -85,12 +85,12 @@ def test_parse_week_rejects_bad_weeks(week):
 def test_unknown_session_type_is_reported_as_malformed():
     week = _week()
     week["days"][2]["session_type"] = "intervals"
-    result = suggest.suggest_week({}, reader=Reader(), client=Client(json.dumps(week)), today=TODAY)
+    result = week_suggestion.suggest_week({}, reader=Reader(), client=Client(json.dumps(week)), today=TODAY)
     assert (result["ok"], result["stage"], result["status"]) == (False, "plan", "malformed")
 
 
 def test_cut_off_reply_is_reported_as_max_tokens():
-    result = suggest.suggest_week({}, reader=Reader(), client=Client("{", stop_reason="max_tokens"), today=TODAY)
+    result = week_suggestion.suggest_week({}, reader=Reader(), client=Client("{", stop_reason="max_tokens"), today=TODAY)
     assert (result["ok"], result["status"]) == (False, "max_tokens")
 
 
@@ -108,15 +108,15 @@ def test_main_prints_the_week_and_exits_zero(tmp_path, monkeypatch, capsys):
     monkeypatch.chdir(tmp_path)
     (tmp_path / ".env").write_text("COROS_EMAIL=a\nCOROS_PASSWORD=b\nCLAUDE_API_KEY=k\n")
     seen = {}
-    real_suggest_week = suggest.suggest_week
+    real_suggest_week = week_suggestion.suggest_week
 
     def fake_suggest_week(creds):
         seen.update(creds)
         return real_suggest_week(creds, reader=Reader(), client=Client(json.dumps(_week())), today=TODAY)
 
-    monkeypatch.setattr(suggest, "suggest_week", fake_suggest_week)
+    monkeypatch.setattr(week_suggestion, "suggest_week", fake_suggest_week)
 
-    assert suggest.main() == 0
+    assert week_suggestion.main() == 0
     out = capsys.readouterr().out
     assert "Sat 10-03" in out and "walk_run" in out and "under 140" in out
     assert "HRV steady" in out
@@ -126,9 +126,9 @@ def test_main_prints_the_week_and_exits_zero(tmp_path, monkeypatch, capsys):
 def test_main_exits_one_when_there_is_no_suggestion(tmp_path, monkeypatch, capsys):
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(
-        suggest, "suggest_week", lambda creds: {"ok": False, "stage": "read", "status": "read_error", "error_type": "X"}
+        week_suggestion, "suggest_week", lambda creds: {"ok": False, "stage": "read", "status": "read_error", "error_type": "X"}
     )
-    assert suggest.main() == 1
+    assert week_suggestion.main() == 1
     assert "stage=read" in capsys.readouterr().out
 
 
@@ -207,7 +207,7 @@ def test_coros_reader_reads_28_days_and_next_7_without_mobile_login(fake_coros):
 def test_default_reader_takes_region_from_creds_then_environment(fake_coros, monkeypatch):
     monkeypatch.setenv("COROS_REGION", "eu")
     creds = {"COROS_EMAIL": "a", "COROS_PASSWORD": "b"}
-    suggest.suggest_week(creds, client=Client(json.dumps(_week())), today=TODAY)
-    suggest.suggest_week(dict(creds, COROS_REGION="us"), client=Client(json.dumps(_week())), today=TODAY)
+    week_suggestion.suggest_week(creds, client=Client(json.dumps(_week())), today=TODAY)
+    week_suggestion.suggest_week(dict(creds, COROS_REGION="us"), client=Client(json.dumps(_week())), today=TODAY)
 
     assert [c[1] for c in fake_coros if c[0] == "login"] == ["eu", "us"]

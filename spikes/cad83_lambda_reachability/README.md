@@ -277,8 +277,8 @@ terraform destroy -var region=ap-southeast-2 \
 
 ## CAD-95: suggested week (`plan` mode, Sydney only)
 
-`{"mode":"plan"}` runs the real backend code (`backend/suggest.py`, the same as
-`python -m backend.suggest` on the Mac): it reads the last 28 days of COROS data
+`{"mode":"plan"}` runs the real backend code (`backend/week_suggestion.py`, the same as
+`python -m backend.week_suggestion` on the Mac): it reads the last 28 days of COROS data
 and asks Claude (Opus 5.5) for a suggested next 7 days, tomorrow plus 6.
 
 - **Read-only.** Nothing is written to COROS, Speediance isn't called, and only

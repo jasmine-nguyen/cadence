@@ -85,6 +85,12 @@ npx expo export -p ios --output-dir "$(mktemp -d)"
 - Target arm64 (Graviton). Any bundled binary must be built for `linux/arm64`.
 - Set `PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring` — coros-mcp's login otherwise tries to use a system keyring and hangs on headless machines.
 
+## Python conventions
+
+Follow these for every Python file and environment variable you name:
+
+@docs/python-conventions.md
+
 ## Working rules
 
 - Never hardcode or commit secrets. `.env`, token caches, `*.tfvars`, `*.tfstate`, `.terraform/` are gitignored. Commit `.terraform.lock.hcl`.

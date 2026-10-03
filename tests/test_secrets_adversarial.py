@@ -1,4 +1,4 @@
-"""CAD-44 QA: adversarial checks for `backend.secrets.get_secrets()` and `suggest.main()`."""
+"""Adversarial checks for `backend.secrets.get_secrets()` and `week_suggestion.main()`."""
 
 import json
 import os
@@ -7,7 +7,7 @@ import traceback
 
 import pytest
 
-from backend import secrets, suggest
+from backend import secrets, week_suggestion
 
 ARN = "arn:aws:secretsmanager:ap-southeast-2:123456789012:secret:cadence/prod-AbCdEf"
 PASSWORD = "hunter2-coros-qa"
@@ -16,7 +16,7 @@ API_KEY = "sk-ant-qa-key"
 
 @pytest.fixture(autouse=True)
 def _fresh_cache(monkeypatch):
-    monkeypatch.delenv("CADENCE_SECRET_ID", raising=False)
+    monkeypatch.delenv("CADENCE_AWS_SECRET_ID", raising=False)
     secrets.clear_cache()
     yield
     secrets.clear_cache()
@@ -44,7 +44,7 @@ def _fake_aws(monkeypatch, response=None, error=None, secret_id=ARN):
     fake_boto3 = type(sys)("boto3")
     fake_boto3.client = lambda service, *a, **kw: FakeClient()
     monkeypatch.setitem(sys.modules, "boto3", fake_boto3)
-    monkeypatch.setenv("CADENCE_SECRET_ID", secret_id)
+    monkeypatch.setenv("CADENCE_AWS_SECRET_ID", secret_id)
     return calls
 
 
@@ -58,12 +58,12 @@ def test_local_mode_missing_env_file_gives_empty_dict(tmp_path, monkeypatch):
     assert secrets.get_secrets(tmp_path / "nope.env") == {}
 
 
-# [A2] (P0) An empty CADENCE_SECRET_ID counts as unset: local mode, no AWS call.
+# [A2] (P0) An empty CADENCE_AWS_SECRET_ID counts as unset: local mode, no AWS call.
 def test_empty_secret_id_falls_back_to_local(tmp_path, monkeypatch):
     env = tmp_path / ".env"
     env.write_text("COROS_EMAIL=local@example.com\n", encoding="utf-8")
     monkeypatch.setitem(sys.modules, "boto3", _NoBoto3())
-    monkeypatch.setenv("CADENCE_SECRET_ID", "")
+    monkeypatch.setenv("CADENCE_AWS_SECRET_ID", "")
     assert secrets.get_secrets(env) == {"COROS_EMAIL": "local@example.com"}
 
 
@@ -123,11 +123,11 @@ def test_client_error_keeps_cause(monkeypatch):
     assert err.value.__cause__ is boom
 
 
-# [A8] (P1) Local mode doesn't serve a cached AWS secret once CADENCE_SECRET_ID is gone.
+# [A8] (P1) Local mode doesn't serve a cached AWS secret once CADENCE_AWS_SECRET_ID is gone.
 def test_local_mode_does_not_return_aws_cache(tmp_path, monkeypatch):
     _fake_aws(monkeypatch, {"SecretString": json.dumps({"COROS_EMAIL": "aws@example.com"})})
     assert secrets.get_secrets() == {"COROS_EMAIL": "aws@example.com"}
-    monkeypatch.delenv("CADENCE_SECRET_ID")
+    monkeypatch.delenv("CADENCE_AWS_SECRET_ID")
     env = tmp_path / ".env"
     env.write_text("COROS_EMAIL=local@example.com\n", encoding="utf-8")
     assert secrets.get_secrets(env) == {"COROS_EMAIL": "local@example.com"}
@@ -142,8 +142,8 @@ def test_os_environ_untouched(tmp_path, monkeypatch):
     _fake_aws(monkeypatch, {"SecretString": json.dumps({"QA_ONLY_KEY_AWS": API_KEY})})
     secrets.get_secrets()
     after = dict(os.environ)
-    after.pop("CADENCE_SECRET_ID", None)
-    before.pop("CADENCE_SECRET_ID", None)
+    after.pop("CADENCE_AWS_SECRET_ID", None)
+    before.pop("CADENCE_AWS_SECRET_ID", None)
     assert after == before
 
 
@@ -164,7 +164,7 @@ def test_empty_json_object_gives_empty_dict(monkeypatch):
     assert secrets.get_secrets() == {}
 
 
-# [A12] (P0) suggest.main() in local mode reads .env from cwd; env vars fill only missing keys.
+# [A12] (P0) week_suggestion.main() in local mode reads .env from cwd; env vars fill only missing keys.
 def test_suggest_main_local_mode_env_fills_only_missing(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     (tmp_path / ".env").write_text(
@@ -179,23 +179,23 @@ def test_suggest_main_local_mode_env_fills_only_missing(tmp_path, monkeypatch):
         seen.update(creds)
         return {"ok": False, "stage": "read", "status": "read_error", "error_type": "X"}
 
-    monkeypatch.setattr(suggest, "suggest_week", fake)
-    suggest.main()
+    monkeypatch.setattr(week_suggestion, "suggest_week", fake)
+    week_suggestion.main()
     assert seen["COROS_EMAIL"] == "file@example.com"
     assert seen["COROS_PASSWORD"] == "env-pw"
 
 
-# [A13] (P1) suggest.main() filling env fallbacks doesn't mutate the cached AWS secret.
+# [A13] (P1) week_suggestion.main() filling env fallbacks doesn't mutate the cached AWS secret.
 def test_suggest_main_does_not_poison_cache(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     _fake_aws(monkeypatch, {"SecretString": json.dumps({"COROS_EMAIL": "aws@example.com"})})
     monkeypatch.setenv("COROS_PASSWORD", "env-pw")
     monkeypatch.setattr(
-        suggest,
+        week_suggestion,
         "suggest_week",
         lambda creds: {"ok": False, "stage": "read", "status": "read_error", "error_type": "X"},
     )
-    suggest.main()
+    week_suggestion.main()
     assert secrets.get_secrets() == {"COROS_EMAIL": "aws@example.com"}
 
 

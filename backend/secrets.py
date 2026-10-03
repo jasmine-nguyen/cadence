@@ -1,6 +1,6 @@
 """Secrets: one dict of credentials, from AWS Secrets Manager in Lambda or a local `.env`.
 
-`get_secrets()` reads Secrets Manager when `CADENCE_SECRET_ID` is set (CAD-81 sets it on
+`get_secrets()` reads Secrets Manager when `CADENCE_AWS_SECRET_ID` is set (CAD-81 sets it on
 the Lambda) and `.env` otherwise. Both give the same UPPER_SNAKE keys with string values.
 
 Never log or print the returned dict. Error messages carry no secret values.
@@ -11,7 +11,7 @@ import json
 import os
 from pathlib import Path
 
-SECRET_ID_ENV = "CADENCE_SECRET_ID"
+SECRET_ID_ENV = "CADENCE_AWS_SECRET_ID"
 
 _cache: dict[str, str] | None = None
 
