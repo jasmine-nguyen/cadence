@@ -1,4 +1,4 @@
-Shared context for every card on the Cadence board. Claude Code: read this page first, then the card. Cards only hold what's specific to them.
+Shared context for every card on the Cadence board. Read this, then the card. Cards only hold what's specific to them.
 
 ## Board
 
