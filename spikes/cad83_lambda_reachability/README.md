@@ -375,6 +375,18 @@ REM and awake sleep **in the invoke response only**. The log line keeps just
 
 Delete `out.json` when you're done.
 
+**Result (2026-10-02):** it logged the phone app out. Use section 5 for sleep instead.
+
+### 5. Official COROS MCP test (once, by hand)
+
+`{"mode":"corosmcp"}` signs in to COROS's official MCP server (`mcp.coros.com`)
+with the email and password from the secret, reads cycle phases, sleep and
+sleep-HRV, then renews the token once. Data goes in the invoke response only;
+tokens are never returned or logged. Never scheduled.
+
+**Result (2026-10-03, Sydney):** worked in about 10 s. Phone app stayed logged in.
+Access token lasts 30 days; each renewal returns a new refresh token.
+
 ## Teardown
 
 Each region has its own local state, so destroy **once per region**:

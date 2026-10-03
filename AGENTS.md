@@ -14,13 +14,13 @@ Skip cards matching: `pending ADR-007`
 
 ## What we're building
 
-A nightly job that reads Jas's COROS health and training data, asks Claude to adjust her weekly running + strength plan, and writes the plan back to COROS (and, pending ADR-007, pushes strength workouts to her Speediance Gym Monster 2). An Expo (React Native) client app shows the plan; Phase 3 connects it to real data.
+A running coach that adjusts the plan when life happens (illness, menstrual cycle, missed runs, poor recovery), which Runna can't. A nightly job reads Jas's COROS data, decides in plain code whether the plan needs changing, asks Claude only when it does, and writes the plan back to COROS (and, pending ADR-007, pushes strength workouts to her Speediance Gym Monster 2). An Expo (React Native) client app shows the plan; Phase 3 connects it to real data.
 
 The Expo app already exists: all 30 frames are built (PRs #2 and #3), running on seeded data in `src/state/data.ts`. Phase 3 is connecting it to real data, not building screens. Design reference: `design_handoff_full_app/`.
 
 Three goals shape scope: (1) a real app Jas uses, (2) a portfolio piece for architect interviews, (3) hands-on AWS Solutions Architect practice. Don't over-build for multiple users, but keep a `user_id` on data.
 
-## Current decisions (as of 2026-09-27)
+## Current decisions (as of 2026-10-03)
 
 - **Develop on Mac**, in the existing GitHub repo `jasmine-nguyen/cadence`.
 - **Runtime: AWS Lambda**, triggered by **EventBridge Scheduler** at 22:00 **`Australia/Melbourne`** (Scheduler supports time zones; classic EventBridge cron rules are UTC-only). The Pi is no longer the runtime. To be recorded in ADR-008.
@@ -29,6 +29,7 @@ Three goals shape scope: (1) a real app Jas uses, (2) a portfolio piece for arch
 - **Database: Turso (serverless SQLite)** — ADR-006. Plain SQLite file for local dev.
 - **COROS: direct, via the community library `cygnusb/coros-mcp` used as a Python library** (not as an MCP server) — ADR-005. No Intervals.icu.
 - **AI: Claude API behind a swappable planner interface** so another provider can be added later.
+- **When Claude is called (ADR-009):** only for a new plan (new goal or block) and for adjustments. The nightly check is plain code; most nights change nothing. Jas's edits (sick, period, skip, pause) come from the app; skip and pause need no AI. Claude Code Routines only for optional jobs, never the nightly check.
 - **Strength content: pending ADR-007** (Fitbod vs Cadence-generated workouts pushed to the GM2). Cards marked "pending ADR-007" must not start until it's decided.
 
 ## Repo layout
@@ -89,11 +90,14 @@ npx expo export -p ios --output-dir "$(mktemp -d)"
 - Never hardcode or commit secrets. `.env`, token caches, `*.tfvars`, `*.tfstate`, `.terraform/` are gitignored. Commit `.terraform.lock.hcl`.
 - Writes to COROS / Speediance should be idempotent: a retried run must not create duplicate workouts.
 - Coaching is conservative by default: when unsure, hold back rather than push harder.
+- Keep docs up to date in the same change (AGENTS.md, READMEs, ADRs and cards): short and to the point.
 - Jas prefers to be guided and to write code herself: explain choices, keep changes small, one card at a time.
 
 ## Known gotchas
 
 - COROS region `us`, endpoint `teamapi.coros.com`.
+- Cycle and sleep data: use COROS's **official** MCP server (`mcp.coros.com`, tools `queryMenstruationCycles`, `querySleepOverview`, `querySleepHrv`). Its password login (OAuth + PKCE) works from AWS and keeps the phone app logged in (tested 2026-10-03). Never use coros-mcp's mobile login: it logs the phone app out.
+- Cycle data is sensitive: pass only what the planner needs, never log it.
 - `schedule_strength_workout` created two calendar entries from one call in testing — investigate before relying on it.
 - `remove_scheduled_workout` returns `None` on success.
 - Runna also writes to COROS; plan is to disconnect Runna after the initial sync so Cadence owns the calendar.
@@ -107,7 +111,7 @@ npx expo export -p ios --output-dir "$(mktemp -d)"
 ## Open questions (not yet decided)
 
 - AWS region: Sydney (`ap-southeast-2`) or Melbourne (`ap-southeast-4`).
-- Whether COROS and Speediance unofficial APIs accept calls from AWS IPs (spike card).
+- Whether to move all COROS reads and writes from coros-mcp to the official MCP server.
 - Threshold pace calibration for pace-targeted runs.
 - Base weekly split (run / strength / rest days).
 
