@@ -26,6 +26,12 @@ Modes, picked by `event["mode"]`:
   (phone-app style) login logs Jas's COROS phone app out. Mobile login only, then
   the last SLEEP_NIGHTS nights of sleep-stage minutes in the invoke response only;
   the log line keeps just ok/stage/error_type/duration_ms. Never scheduled.
+- `corosmcp` (manual, run once): can AWS use COROS's official MCP server
+  (mcp.coros.com) on its own? Logs in with the official helper's password flow
+  (OAuth + PKCE, no phone-app login), reads cycle phases, sleep and sleep-HRV,
+  then refreshes the token once to see how renewal behaves. Tool output goes in
+  the invoke response only; tokens are never returned or logged, and the log
+  line keeps just ok/stage/error_type/duration_ms. Never scheduled.
 
 Speediance is only ever asked to `login` or list `workouts`; nothing is pushed.
 """
@@ -53,7 +59,7 @@ COROS_RUN_SPORT_TYPE = 100  # coros-mcp rejects wire id 1 for runs
 COROS_HEART_RATE_TARGET = 2
 NIGHTLY_FIELDS = ("ok", "stage", "error_type", "duration_ms")
 WRITE_ERROR_TEXT = ("error", "cleanup_error")  # kept in the write response, never logged
-MODES = (None, "write", "contents", "nightly", "plan", "sleep")
+MODES = (None, "write", "contents", "nightly", "plan", "sleep", "corosmcp")
 SLEEP_NIGHTS = 3
 # Plan mode logs only these; the plan itself (dates, sessions, reasons) stays in the reply.
 PLAN_LOG_FIELDS = ("ok", "stage", "status", "error_type", "duration_ms", "coros_ms", "claude_ms", "usage")
@@ -530,6 +536,202 @@ def _coros_sleep(creds):
     return {"ok": True, "stage": stage, "duration_ms": _elapsed_ms(started), "nights": nights}
 
 
+# --- COROS official MCP (manual, run once) -----------------------------------
+# Same protocol as COROS's own helper (coroslab/COROS-MCP,
+# skill/coros_mcp_login_gateway/scripts/coros_mcp_login.py, legacy password login).
+
+COROS_MCP_GATEWAY = "https://mcp.coros.com"
+COROS_MCP_SCOPES = "openid offline_access mcp.tools"
+COROS_MCP_REDIRECT = "http://127.0.0.1:43123/callback"  # never opened: the code is read from the redirect
+COROS_MCP_NIGHTS = 3
+
+
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *args, **kwargs):
+        return None
+
+
+class _McpHttp:
+    """Cookie-keeping HTTP client that hands redirects back instead of following them."""
+
+    def __init__(self):
+        import http.cookiejar
+
+        self.opener = urllib.request.build_opener(
+            urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()), _NoRedirect()
+        )
+
+    def request(self, method, url, *, form=None, body=None, headers=None):
+        import urllib.error
+        import urllib.parse
+
+        headers = dict(headers or {})
+        data = None
+        if form is not None:
+            data = urllib.parse.urlencode(form).encode()
+            headers["Content-Type"] = "application/x-www-form-urlencoded"
+        if body is not None:
+            data = json.dumps(body).encode()
+            headers["Content-Type"] = "application/json"
+        req = urllib.request.Request(url, data=data, headers=headers, method=method)
+        try:
+            response = self.opener.open(req, timeout=20)
+        except urllib.error.HTTPError as error:
+            response = error
+        return response.status, response.headers, response.read().decode("utf-8", "replace")
+
+
+class CorosMcpError(RuntimeError):
+    """Carries an HTTP status only, never the server's reply text."""
+
+
+def _mcp_json(headers, raw):
+    if "text/event-stream" in (headers.get("Content-Type") or ""):
+        events = [line[5:].strip() for line in raw.splitlines() if line.startswith("data:")]
+        raw = events[-1] if events else "{}"
+    return json.loads(raw) if raw else {}
+
+
+def _expect(status, headers, wanted, step):
+    if status not in wanted:
+        raise CorosMcpError(f"{step}: HTTP {status}")
+
+
+def _query(url):
+    import urllib.parse
+
+    return {k: v[0] for k, v in urllib.parse.parse_qs(urllib.parse.urlparse(url).query).items()}
+
+
+def _token_facts(payload):
+    """Lifetimes and field names only, never token values."""
+    return {
+        "expires_in": payload.get("expires_in"),
+        "has_refresh_token": bool(payload.get("refresh_token")),
+        "fields": sorted(payload),
+        **{k: payload[k] for k in payload if k.startswith("refresh") and k.endswith("expires_in")},
+    }
+
+
+def _coros_mcp_login(http, issuer, creds):
+    import base64
+    import hashlib
+    import secrets as pysecrets
+    import urllib.parse
+
+    status, headers, raw = http.request("POST", f"{issuer}/connect/register", body={
+        "client_name": "Cadence spike", "redirect_uris": [COROS_MCP_REDIRECT],
+        "grant_types": ["authorization_code", "refresh_token"], "response_types": ["code"],
+        "scope": COROS_MCP_SCOPES, "token_endpoint_auth_method": "none",
+    })
+    _expect(status, headers, (200, 201), "register")
+    client_id = _mcp_json(headers, raw)["client_id"]
+
+    verifier = pysecrets.token_urlsafe(64)
+    challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).decode().rstrip("=")
+    state = pysecrets.token_urlsafe(24)
+    authorize = f"{issuer}/oauth2/authorize?" + urllib.parse.urlencode({
+        "response_type": "code", "client_id": client_id, "redirect_uri": COROS_MCP_REDIRECT,
+        "scope": COROS_MCP_SCOPES, "code_challenge": challenge, "code_challenge_method": "S256",
+        "resource": f"{issuer}/mcp", "state": state,
+    })
+    status, headers, _ = http.request("GET", authorize)
+    _expect(status, headers, (302, 303), "authorize")
+    coros_url = headers["Location"]
+    q = _query(coros_url)
+    status, headers, _ = http.request("POST", coros_url, form={
+        "client_id": q.get("client_id", ""), "redirect_uri": q.get("redirect_uri", ""),
+        "state": q.get("state", ""), "scope": q.get("scope", ""), "response_type": q.get("response_type", "code"),
+        "activityType": "", "language": "zh", "country": "CN",
+        "userName": creds["COROS_EMAIL"], "password": creds["COROS_PASSWORD"],
+        "checkStatus": "1", "getAllHistoryIn24Hours": "0",
+    })
+    _expect(status, headers, (302, 303), "coros_login")
+    for step in ("callback", "resume"):
+        status, headers, _ = http.request("GET", headers["Location"])
+        _expect(status, headers, (302, 303), step)
+    returned = _query(headers["Location"])
+    if returned.get("state") != state or not returned.get("code"):
+        raise CorosMcpError("state mismatch or missing code")
+
+    status, headers, raw = http.request("POST", f"{issuer}/oauth2/token", form={
+        "grant_type": "authorization_code", "client_id": client_id, "code": returned["code"],
+        "redirect_uri": COROS_MCP_REDIRECT, "code_verifier": verifier,
+    })
+    _expect(status, headers, (200,), "token")
+    return client_id, _mcp_json(headers, raw)
+
+
+def _coros_mcp_call(http, issuer, access_token, name, arguments):
+    headers = {"Authorization": f"Bearer {access_token}", "Accept": "application/json, text/event-stream"}
+    for request_id, method, params in (
+        (1, "initialize", {"protocolVersion": "2025-06-18", "capabilities": {},
+                           "clientInfo": {"name": "Cadence spike", "version": "0.1"}}),
+        (2, "tools/call", {"name": name, "arguments": arguments}),
+    ):
+        status, reply_headers, raw = http.request(
+            "POST", f"{issuer}/mcp", headers=headers,
+            body={"jsonrpc": "2.0", "id": request_id, "method": method, "params": params},
+        )
+        _expect(status, reply_headers, (200,), method)
+        payload = _mcp_json(reply_headers, raw)
+        if "error" in payload:
+            raise CorosMcpError(f"{method}: rpc error {payload['error'].get('code')}")
+    result = payload["result"]
+    text = "\n".join(part.get("text", "") for part in result.get("content", []) if part.get("type") == "text")
+    return {"is_error": bool(result.get("isError")), "text": text}
+
+
+def _coros_mcp(creds, http=None):
+    started = time.monotonic()
+    stage = "discover"
+    http = http or _McpHttp()
+    try:
+        status, headers, raw = http.request("GET", f"{COROS_MCP_GATEWAY}/.well-known/openid-configuration")
+        _expect(status, headers, (200,), "discover")
+        issuer = _mcp_json(headers, raw).get("issuer", COROS_MCP_GATEWAY).rstrip("/")
+
+        stage = "login"
+        client_id, tokens = _coros_mcp_login(http, issuer, creds)
+        first = _token_facts(tokens)
+
+        today = _melbourne_today()
+        start = (today - timedelta(days=COROS_MCP_NIGHTS - 1)).strftime("%Y%m%d")
+        end = today.strftime("%Y%m%d")
+        tools = {}
+        for name, arguments in (
+            ("queryMenstruationCycles", {}),
+            ("querySleepOverview", {"startDate": start, "endDate": end}),
+            ("querySleepHrv", {"startDate": start, "endDate": end, "days": COROS_MCP_NIGHTS}),
+        ):
+            stage = f"call:{name}"
+            tools[name] = _coros_mcp_call(http, issuer, tokens["access_token"], name, arguments)
+
+        stage = "refresh"
+        status, headers, raw = http.request("POST", f"{issuer}/oauth2/token", form={
+            "grant_type": "refresh_token", "client_id": client_id, "refresh_token": tokens["refresh_token"],
+        })
+        _expect(status, headers, (200,), "refresh")
+        renewed = _mcp_json(headers, raw)
+        refresh = {
+            **_token_facts(renewed),
+            "refresh_token_rotated": renewed.get("refresh_token") not in (None, tokens["refresh_token"]),
+        }
+        stage = "call_after_refresh"
+        check = _coros_mcp_call(http, issuer, renewed["access_token"], "queryMenstruationCycles", {})
+        refresh["works_after_refresh"] = not check["is_error"]
+    except Exception as error:
+        # Type and our own short message only: never the server's reply text.
+        failure = {"ok": False, "stage": stage, "duration_ms": _elapsed_ms(started), "error_type": type(error).__name__}
+        if isinstance(error, CorosMcpError):
+            failure["detail"] = str(error)
+        return failure
+    return {
+        "ok": True, "stage": "done", "duration_ms": _elapsed_ms(started), "issuer": issuer,
+        "first_token": first, "refresh": refresh, "tools": tools,
+    }
+
+
 # --- Entry point -------------------------------------------------------------
 
 
@@ -571,6 +773,10 @@ def handler(event, context):
         sleep = _coros_sleep(creds)
         result = {"mode": "sleep", "coros": sleep}
         log_line = {"mode": "sleep", "coros": _status_only(sleep)}
+    elif mode == "corosmcp":
+        official = _coros_mcp(creds)
+        result = {"mode": "corosmcp", "coros": official}
+        log_line = {"mode": "corosmcp", "coros": _status_only(official)}
     else:
         result = log_line = _nightly(creds)
 
