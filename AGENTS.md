@@ -79,6 +79,11 @@ npx expo export -p ios --output-dir "$(mktemp -d)"
 # Once backend/ has tests: PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring python3 -m pytest
 ```
 
+Agents check screens in the Simulator with the `simulator-check` skill
+(`.claude/skills/simulator-check/`, needs AXe: `brew install cameroncooke/axe/axe`).
+The build's QA only drives the Simulator when Metro is running from the build's
+own checkout; otherwise screen checks stay manual.
+
 ## Lambda constraints
 
 - Only `/tmp` is writable. Put token caches there (e.g. `SPEEDIANCE_TOKEN_CACHE=/tmp/speediance/token.json`, COROS tokens likewise). Expect a fresh login after cold starts.
