@@ -1,16 +1,22 @@
-Shared context for every card on the Cadence board. Read this, then the card. Cards only hold what's specific to them.
+Shared context for every card in the Cadence Linear team. Read this, then the card. Cards only hold what's specific to them.
 
 ## Board
 
-Notion data source: `collection://42eafeb3-4f0d-4a70-9a5b-3eeb0d6727a4`
+Linear team: `cadence`
 Card prefix: `CAD`
-Default card type: `Feature`
+Default card label: `Feature`
 
 ## Card picking
 
-Sort field: `Order`
-Blocker relation: `Blocked by`
 Skip cards matching: `pending ADR-007`
+
+## Filing cards
+
+Cards are Linear issues in the `cadence` team. Every card title follows
+`<icon> <title>` — e.g. `🚀 Show the adjusted plan in the app`.
+Linear assigns the ticket number (`CAD-82`). Search Linear before filing so you
+don't file a duplicate. Give each card the label that matches its icon:
+🧪 Test · 🚀 Feature · 🐞 Bug · 🏗️ Tech debt · 🔬 Spike · 🗑️ No longer needed.
 
 ## What we're building
 
