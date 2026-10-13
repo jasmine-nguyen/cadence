@@ -1,15 +1,13 @@
-Shared context for every card on the Cadence board. Read this, then the card. Cards only hold what's specific to them.
+Shared context for every card in the Cadence Linear team. Read this, then the card. Cards only hold what's specific to them.
 
 ## Board
 
-Notion data source: `collection://42eafeb3-4f0d-4a70-9a5b-3eeb0d6727a4`
+Linear team: `cadence`
 Card prefix: `CAD`
-Default card type: `Feature`
+Default card label: `Feature`
 
 ## Card picking
 
-Sort field: `Order`
-Blocker relation: `Blocked by`
 Skip cards matching: `pending ADR-007`
 
 ## What we're building
