@@ -10,6 +10,14 @@ Default card label: `Feature`
 
 Skip cards matching: `pending ADR-007`
 
+## Filing cards
+
+Cards are Linear issues in the `cadence` team. Every card title follows
+`<icon> <title>` — e.g. `🚀 Show the adjusted plan in the app`.
+Linear assigns the ticket number (`CAD-82`). Search Linear before filing so you
+don't file a duplicate. Give each card the label that matches its icon:
+🧪 Test · 🚀 Feature · 🐞 Bug · 🏗️ Tech debt · 🔬 Spike · 🗑️ No longer needed.
+
 ## What we're building
 
 A running coach that adjusts the plan when life happens (illness, menstrual cycle, missed runs, poor recovery), which Runna can't. A nightly job reads Jas's COROS data, decides in plain code whether the plan needs changing, asks Claude only when it does, and writes the plan back to COROS (and, pending ADR-007, pushes strength workouts to her Speediance Gym Monster 2). An Expo (React Native) client app shows the plan; Phase 3 connects it to real data.
